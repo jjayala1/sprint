@@ -47,7 +47,7 @@
                     <option {% if day_sel|int == d %} selected {% endif %} value="{{d}}">{{d}}</option>
                 {% endfor%}
             </select>
-        </div> 
+        </div>
         <div class="input-group input-group-sm col-2">
             <div class="input-group-prepend">
                 <span class="input-group-text" id="inputGroup4">Sprinter:</span>
@@ -58,10 +58,10 @@
                     <option {% if owner_sel == sp %} selected {% endif %} value="{{sp}}">{{sp}}</option>
                 {% endfor%}
             </select>
-        </div> 
+        </div>
         <div class="input-group input-group-sm col-2">
             <input type="submit" value='Apply filter' class="btn btn-success">
-        </div> 
+        </div>
     </form>
     <br><p>
 
@@ -88,7 +88,7 @@
                 {% if data == None %}
                     <td>0</td>
                 {% elif loop.index0 == 2 %}
-                    <td> <a href='{{data}}'>{{data}}</a></td>
+                    <td> <a target='post' href='{{data}}'>{{data}}</a></td>
                 {% else %}
                     <td>{{data}}</td>
                 {% endif %}
