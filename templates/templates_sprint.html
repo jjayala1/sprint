@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Dashboard Sprint Templates</title>
+  <meta name="description" content="HTML5 Template">
+  <meta name="author" content="JJJA">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="static/style.css?v=1.0">
+
+</head>
+
+<body>
+    <h1>LinkedIn Sprint Tom Kuegler October 2021</h1>
+    <h2>Templates Day 1-15</h2>
+    <br>
+    <button class='btn btn-primary' onclick="location.href='/dashboard'">Dashboard</button>
+    <button class='btn btn-primary' onclick="location.href='/stats'">Stats</button>
+    <br><p>
+
+    <table class='table table-bordered table-striped table-hover table-sm table-responsive table-dark'>
+        <thead>
+            <tr class='bg-success'>
+                <th>Day</th>
+                <th>Link</th>
+                <th>Comment</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for i,t in templates %}
+            <tr>
+                <td>{{i+1}}</td>
+                <td><a target='templates' href='{{t}}'>{{t}}</a></td>
+                <td></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+</body>
+
+
