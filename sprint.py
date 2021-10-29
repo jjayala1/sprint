@@ -11,8 +11,8 @@ class Sprint():
     def __init__(self, day=10, file=''):
         self.day = day
         self.file = file
-        self.ruta = '/home/jjayala/kit/sprint'
-        #self.ruta = '/home/sprintOct21/sprint');
+        #self.ruta = '/home/jjayala/kit/sprint'
+        self.ruta = '/home/sprintOct21/sprint';
         self.conn = self.create_database(f'{self.ruta}/sprint.db');
         self.create_tables()
 
