@@ -1,8 +1,5 @@
-# A very simple Flask Hello World app for you to get started with...
-
 from flask import Flask, render_template, request, session, redirect, url_for
 import sprint
-
 
 app = Flask(__name__)
 app.secret_key = "NzFiZjVjNTQzODAwYThkMWVhNGMwZWI0"
@@ -17,12 +14,14 @@ def dashboard():
         owner = '%'
 
     if request.method == 'POST':
-        day = request.form['filter_day'] 
+        day = request.form['filter_day']
         owner = request.form['filter_owner']
         print(day,owner)
         sprinters, pivot = datos.pivot_table(day, owner)
 
     return render_template('dashboard.html', sprinters=sprinters, pivot=pivot, day_sel=day, owner_sel=owner )
+
+
 
 @app.route('/templates', methods=['GET'])
 def templates():
@@ -49,18 +48,44 @@ def templates():
         return render_template('templates_sprint.html', templates=enumerate(templates))
 
 
-@app.route('/new_post', methods=['POST'])
+@app.route('/new_post', methods=['GET','POST'])
 def new_post():
+    if request.method == 'GET':
+        return render_template('new_post.html' )
+
     if request.method == 'POST':
         day = request.form['day_number']
         link = request.form['new_link']
         datos = sprint.Sprint()
         datos.new_post(day, link)
-        return redirect(url_for('dashboard'))
+        return render_template('new_post.html' )
 
-        #return render_template('new_post.html' )
 
+
+@app.route("/stats", methods=['GET', 'POST'])
+def chart():
+
+    if request.method == 'POST':
+        day = request.form['filter_day']
+        owner = request.form['filter_owner']
+        print(day,owner)
+
+    else:
+        day = '%'
+        owner = '%'
+
+    datos = sprint.Sprint()
+    sprinters = datos.get_sprinters()
+    dataset = datos.data_likes(day, owner)
+    print('Datos:', dataset)
+
+
+    return render_template('chart.html', dataset=dataset, day_sel=day, owner_sel=owner, sprinters=sprinters)
 
 if __name__ == '__main__':
     app.run(port=8002, debug=True)
+
+
+
+
 
