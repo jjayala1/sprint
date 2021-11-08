@@ -204,7 +204,15 @@ class Sprint():
             s = [d[0], d[1], d[2]]
             dataset.append(s)
 
-        return dataset
+        sql_reactions = f"SELECT sum(num_likes), sum(num_comments) from posts where day like '{day}' and owner like '{owner}'"
+        data1 = self.conn.cursor()
+        data1.execute(sql_reactions)
+
+        for d in data1:
+            num_likes = d[0]
+            num_comments = d[1]
+
+        return dataset, num_likes, num_comments
 
 
 if __name__ == '__main__':

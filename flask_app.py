@@ -76,11 +76,13 @@ def chart():
 
     datos = sprint.Sprint()
     sprinters = datos.get_sprinters()
-    dataset = datos.data_likes(day, owner)
+    dataset, num_likes, num_comments = datos.data_likes(day, owner)
     print('Datos:', dataset)
+    print('Likes:', num_likes)
+    print('Comments:', num_comments)
 
 
-    return render_template('chart.html', dataset=dataset, day_sel=day, owner_sel=owner, sprinters=sprinters)
+    return render_template('chart.html', dataset=dataset, day_sel=day, owner_sel=owner, sprinters=sprinters, num_likes=num_likes, num_comments=num_comments)
 
 if __name__ == '__main__':
     app.run(port=8002, debug=True)

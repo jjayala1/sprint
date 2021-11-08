@@ -9,12 +9,11 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <link rel="stylesheet" href="static/style.css?v=1.0">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.js"></script>
-  <script src="https://github.com/kluverua/Chartjs-tsgauge/blob/master/Gauge.js"></script>
 </head>
 
 <body>
     <h1>LinkedIn Sprint Thomas Kuegler October 2021</h1>
-    <h2>Templates Day 1-15</h2>
+    <h2>Main Stats</h2>
     <button class='btn btn-primary' onclick="location.href='/dashboard'">Dashboard</button>
     <button class='btn btn-primary' onclick="location.href='/templates'">Templates</button>
     <br><p>
@@ -46,19 +45,22 @@
         <div class="input-group input-group-sm col-2">
             <input type="submit" value='Apply filter' class="btn btn-success">
         </div>
+        <button type="button" class="btn btn-primary">
+            Reactions <span class="badge badge-light">{{num_likes}}</span>
+        </button>
+        <button type="button" class="btn btn-primary">
+            Comments <span class="badge badge-light">{{num_comments}}</span>
+        </button>
     </form>
-    <br><p>
 
 
 
-<div>
-    <canvas id="myChart" width="600" height="200"></canvas>
-</div>
 
 
 <div>
-    <canvas id="gauge" width="600" height="200"></canvas>
+    <canvas id="postsChart" width="600" height="200"></canvas>
 </div>
+
 
 <script>
 
@@ -79,7 +81,8 @@
     }
 
 
-    new Chart(document.getElementById("myChart"), {
+
+    new Chart(document.getElementById("postsChart"), {
         type: 'bar',
         data: {
             labels: labels,
@@ -122,25 +125,7 @@
         }
     });
 
-    var ctx = document.getElementById("gauge").getContext("2d");
-    new Chart(ctx, {
-        type: "tsgauge",
-        data: {
-            datasets: [{
-                backgroundColor: ["#0fdc63", "#fd9704", "#ff7143"],
-                borderWidth: 0,
-                gaugeData: {
-                    value: 7777,
-                    valueColor: "#ff7143"
-                },
-                gaugeLimits: [0, 3000, 7000, 10000]
-            }]
-        },
-        options: {
-            events: [],
-            showMarkers: true
-        }
-    });
+
 
 
 </script>
