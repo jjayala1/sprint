@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <link rel="stylesheet" href="static/style.css?v=1.0">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.js"></script>
+  <script src="https://github.com/kluverua/Chartjs-tsgauge/blob/master/Gauge.js"></script>
 </head>
 
 <body>
@@ -54,6 +55,11 @@
     <canvas id="myChart" width="600" height="200"></canvas>
 </div>
 
+
+<div>
+    <canvas id="gauge" width="600" height="200"></canvas>
+</div>
+
 <script>
 
     function myFunc(vars) {
@@ -74,47 +80,67 @@
 
 
     new Chart(document.getElementById("myChart"), {
-    type: 'bar',
-    data: {
-        labels: labels,
-        datasets: [
-          {
-            label: "Likes",
-            backgroundColor: ["#0e6e02"],
-            data: likes
-          },
-          {
-            label: "Comments",
-            backgroundColor: ["#045850"],
-            data: comments
-          },
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Likes",
+                    backgroundColor: ["#0e6e02"],
+                    data: likes
+                },
+                {
+                    label: "Comments",
+                    backgroundColor: ["#045850"],
+                    data: comments
+                },
 
-        ]
-    },
-    options: {
-      legend: { display: true },
-      plugins: {
-          title: {
-            display: true,
-            text: 'Sprint'
-          }
-      },
-      scales: {
-        x: {
-          title: {
-            display: true,
-            text: 'Day/Sprinter'
-          }
+            ]
         },
-        y: {
-          title: {
-            display: true,
-            text: ''
-          }
+        options: {
+            legend: { display: true },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Sprint'
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Day/Sprinter'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: ''
+                    }
+                }
+            },
         }
-      },
-    }
-});
+    });
+
+    var ctx = document.getElementById("gauge").getContext("2d");
+    new Chart(ctx, {
+        type: "tsgauge",
+        data: {
+            datasets: [{
+                backgroundColor: ["#0fdc63", "#fd9704", "#ff7143"],
+                borderWidth: 0,
+                gaugeData: {
+                    value: 7777,
+                    valueColor: "#ff7143"
+                },
+                gaugeLimits: [0, 3000, 7000, 10000]
+            }]
+        },
+        options: {
+            events: [],
+            showMarkers: true
+        }
+    });
 
 
 </script>
