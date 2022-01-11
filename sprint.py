@@ -13,7 +13,7 @@ class Sprint():
         self.day = day
         self.file = file
         self.link = link
-        self.ruta = '/home/sprintOct21/sprint'
+        self.ruta = './'
         self.conn = self.create_database(f'{self.ruta}/sprint.db');
         self.create_tables()
         self.data = ''
@@ -93,6 +93,24 @@ class Sprint():
         self.conn.commit()
         return cur.lastrowid
 
+    def insert_comments2(self, day, id_post, author, message, action):
+
+        cur = self.conn.cursor()
+        print(action)
+
+        if action == False:
+            sql_del = f"DELETE FROM comments WHERE id_post='{id_post}' and author='{author}' and message=''"
+            print(sql_del)
+            cur.execute(sql_del)
+            self.conn.commit()
+
+        else:
+            sql_ins = 'INSERT OR IGNORE INTO comments(id_post, author, message) VALUES(?,?,?);'
+            cur.execute(sql_ins, (id_post, author, message))
+            self.conn.commit()
+
+        return cur.lastrowid
+
     def create_database(self, db_file):
         conn = None
         try:
@@ -117,7 +135,8 @@ class Sprint():
                         id integer PRIMARY KEY,
                         id_post integer NOT NULL,
                         author TEXT NOT NULL,
-                        message TEXT NOT NULL);
+                        message TEXT NOT NULL,
+                        UNIQUE(id_post, author, message));
                       """
 
         table_sprinters = """CREATE TABLE IF NOT EXISTS sprinters(
@@ -185,10 +204,10 @@ class Sprint():
             sprinters.append(s[0])
         return sprinters
 
-    def get_links(self, day):
+    def get_links(self, day, author):
 
-        author = 'Ana Bullard'
-        sql_links = f"SELECT P.id,owner,link,count(id_post) from posts P left join comments C on P.id=C.id_post WHERE day='{day}' and (author like '{author}' or author is null) group by P.id ORDER BY owner"
+        sql_links = f"SELECT P.id,owner,link,count(id_post) from posts P left join comments C on P.id=C.id_post WHERE day='{day}' and (author like '{author}' or author is null) and (message='' or message is null) group by P.id ORDER BY owner"
+        print(sql_links)
         lnk = self.conn.cursor()
         lnk.execute(sql_links)
         links = lnk.fetchall()

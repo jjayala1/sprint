@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 import sprint
+import json
 
 app = Flask(__name__)
 app.secret_key = "NzFiZjVjNTQzODAwYThkMWVhNGMwZWI0"
@@ -63,17 +64,33 @@ def new_post():
 
 @app.route('/track', methods=['GET','POST'])
 def track():
+    datos = sprint.Sprint()
+
+
     if request.method == 'GET':
         day = '%'
-        owner = '%'
+        author = 'Ana Bullard'
 
     if request.method == 'POST':
-        day = request.form['filter_day']
 
-    datos = sprint.Sprint()
-    links = datos.get_links(day)
+        if 'filter_day' in request.form:
+            day = request.form['filter_day']
 
-    return render_template('track.html', day_sel=day, links=links)
+        if 'author' in request.form:
+            author = request.form['author']
+
+        data = request.json
+
+        if data:
+            day = data[0]['day']
+            author = data[1]['author']
+            id_post = data[2]['id_post']
+            action = data[3]['action']
+            datos.insert_comments2(day, id_post, author, '', action)
+
+    links = datos.get_links(day, author)
+
+    return render_template('track.html', day_sel=day, links=links, author=author)
 
 
 @app.route("/stats", methods=['GET', 'POST'])

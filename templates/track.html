@@ -8,7 +8,8 @@
   <meta name="author" content="JJJA">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <link rel="stylesheet" href="static/style.css?v=1.0">
-
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src='static/track.js'></script>
 </head>
 
 <body>
@@ -29,6 +30,8 @@
             </select>
         </div>
     <br><p>
+    <input type='text' name='author' id='author' value='{{author}}'>
+    </form>
 
     <table class='table table-bordered table-striped table-hover table-sm table-responsive table-dark'>
         <thead>
@@ -43,13 +46,12 @@
             <tr>
                 <td>{{link[1]}}</td>
                 <td> <a target='post' href='{{link[1]}}'>{{link[2]}}</a></td>
-                <td><input type='checkbox' id='post_{{link[0]}}' onchange='submit()' {% if link[3]|int > 0 %} checked {% endif %}></td>
+                <td><input class='check' type='checkbox' name='id_post' id='{{link[0]}}' value='{{link[0]}}' {% if link[3]|int > 0 %} checked {% endif %}></td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
-    </form>
 
 </body>
 
