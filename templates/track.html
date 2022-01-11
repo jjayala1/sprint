@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Dashboard Sprint</title>
+  <meta name="description" content="HTML5 Template">
+  <meta name="author" content="JJJA">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="static/style.css?v=1.0">
+
+</head>
+
+<body>
+    <!-- h1>LinkedIn Sprint Thomas Kuegler October 2021</h1 -->
+    <br>
+
+    <form name="nueva" method="post" class="form-inline" action="/track">
+        {% print(day_sel) %}
+        <div class="input-group input-group-sm col-2">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup3">Day:</span>
+            </div>
+            <select name="filter_day" id="filter_day" onchange='submit()' class="form-control">
+                <option {% if day_sel == '%' %} selected {% endif %} value="%">All</option>
+                {% for d in range(1, 31) %}
+                    <option {% if day_sel|int == d %} selected {% endif %} value="{{d}}">{{d}}</option>
+                {% endfor%}
+            </select>
+        </div>
+    </form>
+    <br><p>
+
+    <table class='table table-bordered table-striped table-hover table-sm table-responsive table-dark'>
+        <thead>
+            <tr class='bg-success'>
+                <th>Owner</th>
+                <th>Link</th>
+                <th>Check</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for link in links %}
+            <tr>
+                <td>{{link[1]}}</td>
+                <td> <a target='post' href='{{link[1]}}'>{{link[2]}}</a></td>
+                <td><input type='checkbox' id='post_{{link[0]}}' {% if link[3]|int > 0 %} checked {% endif %}></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+
+</body>
+
+

@@ -185,6 +185,15 @@ class Sprint():
             sprinters.append(s[0])
         return sprinters
 
+    def get_links(self, day):
+
+        author = 'Ana Bullard'
+        sql_links = f"SELECT P.id,owner,link,count(id_post) from posts P left join comments C on P.id=C.id_post WHERE day='{day}' and (author like '{author}' or author is null) group by P.id ORDER BY owner"
+        lnk = self.conn.cursor()
+        lnk.execute(sql_links)
+        links = lnk.fetchall()
+        return links
+
     def data_likes(self, day='%', owner='%'):
 
         sql_data = f"SELECT owner, sum(num_likes), sum(num_comments) from posts where day like '{day}' and owner like '{owner}' group by owner order by owner"

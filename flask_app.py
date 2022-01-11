@@ -61,6 +61,20 @@ def new_post():
         return render_template('new_post.html' )
 
 
+@app.route('/track', methods=['GET','POST'])
+def track():
+    if request.method == 'GET':
+        day = '%'
+        owner = '%'
+
+    if request.method == 'POST':
+        day = request.form['filter_day']
+
+    datos = sprint.Sprint()
+    links = datos.get_links(day)
+
+    return render_template('track.html', day_sel=day, links=links)
+
 
 @app.route("/stats", methods=['GET', 'POST'])
 def chart():
