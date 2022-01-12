@@ -6,6 +6,7 @@ class Modelo:
 
     def abre_conexion(self):
         self.connection =  sqlite3.connect('sprint.db', check_same_thread = False)
+        #self.connection =  sqlite3.connect('/home/sprintOct21/sprint/sprint.db', check_same_thread = False)
         self.cursor = self.connection.cursor()
 
     def cierra_conexion(self):
