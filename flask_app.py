@@ -102,9 +102,41 @@ def new_post():
         link = request.form['new_link']
         datos = sprint.Sprint()
         datos.new_post(day, link, session['author'])
-        return redirect(url_for('track'))
+        return redirect(request.referrer)
         #return render_template('new_post.html' )
 
+
+@app.route('/delete_post', methods=['GET','POST'])
+def delete_post():
+
+    if request.method == 'GET':
+        id_post = request.args['id_post']
+        print(id_post)
+        datos = sprint.Sprint()
+        datos.delete_post(id_post)
+    return redirect(request.referrer)
+
+@app.route('/edit_post', methods=['GET','POST'])
+def edit_post():
+
+    if request.method == 'GET':
+        datos = sprint.Sprint()
+        id_post = request.args['id_post']
+        datos_post = datos.get_post(id_post)
+        print(datos_post)
+        return render_template('edit.html', datos=datos_post)
+
+    if request.method == 'POST':
+        #and request.form['accion'] == 'edit':
+        print(request.form['accion'])
+        id_post = request.form['id_post']
+        link = request.form['link']
+        num_views = request.form['num_views']
+        num_likes = request.form['num_likes']
+        num_comments = request.form['num_comments']
+        datos = sprint.Sprint()
+        datos.edit_post(id_post, link, num_views, num_likes, num_comments)
+        return redirect(url_for('myposts'))
 
 @app.route('/track', methods=['GET','POST'])
 def track():
@@ -136,6 +168,26 @@ def track():
 
     return render_template('track.html', day_sel=day, links=links, author=author)
 
+
+@app.route('/myposts', methods=['GET','POST'])
+def myposts():
+    datos = sprint.Sprint()
+    username = session['username']
+    author = session['author']
+    grupo = session['grupo']
+
+    d1 = date(2022, 1, 9)
+    d2 = date.today()
+    day = (d2 - d1).days
+
+    if request.method == 'GET':
+        pass
+
+    if request.method == 'POST':
+        pass
+
+    links = datos.get_myposts(author)
+    return render_template('myposts.html', day_sel=day, links=links, author=author)
 
 @app.route("/stats", methods=['GET', 'POST'])
 def chart():

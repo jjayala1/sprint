@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>EDIT POST</title>
+  <meta name="description" content="HTML5 Template">
+  <meta name="author" content="JJJA">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="static/style.css?v=1.0">
+
+</head>
+
+<body>
+    <h2>EDIT POST {{id_post}}</h2>
+    <br>
+
+    <form name="signup" method="post" class="form-inline">
+        <input name='accion' type='hidden'>
+
+        <div class="input-group input-group-sm col-8">
+            <div class="input-group-prepend-sm">
+                <span class="input-group-text" id="inputGroup2">ID:</span>
+            </div>
+            <input size=20 type="text" id="id_post" name="id_post" placeholder="" class="form-control" value='{{datos[0]}}' required>
+        </div>
+
+        <div class="input-group input-group-sm col-8">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup2">Link:</span>
+            </div>
+            <input type="url" id="link" name="link" placeholder="Link" class="form-control" value='{{datos[1]}}' required>
+        </div>
+        <div class="input-group input-group-sm col-8">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup2">Views:</span>
+            </div>
+            <input type="number" id="num_views" name="num_views" placeholder="Views" class="form-control" value='{{datos[2]}}'>
+        </div>
+        <div class="input-group input-group-sm col-8">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup2">Reactions:</span>
+            </div>
+            <input type="number" id="num_likes" name="num_likes" placeholder="Likes" class="form-control" value='{{datos[3]}}'>
+        </div>
+        <div class="input-group input-group-sm col-8">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup2">Comments:</span>
+            </div>
+            <input type="number" id="num_comments" name="num_comments" placeholder="Comments" class="form-control" value='{{datos[4]}}' >
+        </div>
+
+        <div class="input-group input-group-sm col-8">
+            <p>
+        </div>
+        <div class="input-group input-group-sm col-8">
+            <button class='btn btn-primary' onclick="document.edit.accion.value='edit';">Save</button>
+            <button class='btn btn-warning' onclick="location.href='/myposts'" type="button">Cancel</button>
+        </div>
+
+    </form>
+</body>
+

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Dashboard Sprint</title>
+  <meta name="description" content="HTML5 Template">
+  <meta name="author" content="JJJA">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="static/style.css?v=1.0">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src='static/track.js'></script>
+</head>
+
+<body>
+    <h1>LinkedIn Sprint Thomas Kuegler January 2022</h1>
+    <button class='btn btn-primary' onclick="location.href='/dashboard'">Dashboard</button>
+    <button class='btn btn-primary' onclick="location.href='/stats'">Stats</button>
+    <button class='btn btn-primary' onclick="location.href='/track'">Track</button>
+    <button class='btn btn-primary' onclick="location.href='/templates'">Templates</button>
+    <br><p>
+
+    <form name="nueva" method="post" class="form-inline" action="/new_post">
+
+        <div class="input-group input-group-sm col-2">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup2">Day(1-30)</span>
+            </div>
+            <input type="number" id="day_number" name="day_number" min="1" max="30" value={{day_sel}} class="form-control" aria-label="Small" aria-describedby="inputGroup2">
+        </div>
+        <div class="input-group input-group-sm col-8">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup2">URL:</span>
+            </div>
+            <input type="url" id="new_link" name="new_link" placeholder="LinkedIn URL" class="form-control">
+            <input type="submit" value='Send' class="btn btn-success">
+        </div>
+    </form>
+    <br><p>
+    <br><p>
+
+    <table class='table table-bordered table-striped table-hover table-sm table-responsive table-dark'>
+        <thead>
+            <tr class='bg-success'>
+                <th>Day</th>
+                <th>Date/Time</th>
+                <th>Views</th>
+                <th>Reactions</th>
+                <th>Total Comments</th>
+                <th>Sprint Comments</th>
+                <th>Extra</th>
+                <th>Open</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for link in links %}
+            <tr>
+                <td>{{link[1]}}</td>
+                <td>{{link[4]}}</td>
+                <td>{{link[5]}}</td>
+                <td>{{link[6]}}</td>
+                <td>{{link[7]}}</td>
+                <td>{{link[8]}}</td>
+                <td></td>
+                <td onclick="window.open('{{link[3]}}','_blank')"><img src='static/open.png'></td>
+                <td><a href='/edit_post?id_post={{link[0]}}'><img src='static/edit.png'></td>
+                <td><a href='/delete_post?id_post={{link[0]}}'><img src='static/erase.png'></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+
+</body>
+
+

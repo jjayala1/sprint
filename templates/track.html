@@ -16,25 +16,9 @@
     <h1>LinkedIn Sprint Thomas Kuegler January 2022</h1>
     <button class='btn btn-primary' onclick="location.href='/dashboard'">Dashboard</button>
     <button class='btn btn-primary' onclick="location.href='/stats'">Stats</button>
+    <button class='btn btn-primary' onclick="location.href='/myposts'">My Posts</button>
     <button class='btn btn-primary' onclick="location.href='/templates'">Templates</button>
     <br><p>
-
-    <form name="nueva" method="post" class="form-inline" action="/new_post">
-
-        <div class="input-group input-group-sm col-2">
-            <div class="input-group-prepend">
-                <span class="input-group-text" id="inputGroup2">Day(1-30)</span>
-            </div>
-            <input type="number" id="day_number" name="day_number" min="1" max="30" value={{day_sel}} class="form-control" aria-label="Small" aria-describedby="inputGroup2">
-        </div>
-        <div class="input-group input-group-sm col-8">
-            <div class="input-group-prepend">
-                <span class="input-group-text" id="inputGroup2">URL:</span>
-            </div>
-            <input type="url" id="new_link" name="new_link" placeholder="LinkedIn URL" class="form-control">
-            <input type="submit" value='Send' class="btn btn-success">
-        </div>
-    </form>
 
     <form name="nueva" method="post" class="form-inline" action="/track">
         <div class="input-group input-group-sm col-2">
@@ -57,16 +41,16 @@
         <thead>
             <tr class='bg-success'>
                 <th>Owner</th>
-                <th>Link</th>
+                <th>Comments</th>
                 <th>Check</th>
             </tr>
         </thead>
         <tbody>
         {% for link in links %}
             <tr>
-                <td>{{link[1]}}</td>
-                <td> <a target='post' href='{{link[1]}}'>{{link[2]}}</a></td>
-                <td><input class='check' type='checkbox' name='id_post' id='{{link[0]}}' value='{{link[0]}}' {% if link[3]|int > 0 %} checked {% endif %}></td>
+                <td> <a target='post' href='{{link[2]}}'>{{link[1]}}</a></td>
+                <td>{{link[3]}}</td>
+                <td><input class='check' type='checkbox' name='id_post' id='{{link[0]}}' value='{{link[0]}}' {% if link[4]|int > 0 %} checked {% endif %}></td>
             </tr>
         {% endfor %}
         </tbody>

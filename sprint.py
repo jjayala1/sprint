@@ -187,6 +187,7 @@ class Sprint():
         curtime = x.strftime("%Y-%m-%d %X")
 
         sql = 'REPLACE INTO posts(day, link, owner, start_date) VALUES(?, ?, ?, ?);'
+        print(sql,day, link, owner, curtime)
         cur = self.conn.cursor()
         cur.execute(sql, (day, link, owner, curtime))
         self.conn.commit()
@@ -208,12 +209,43 @@ class Sprint():
 
     def get_links(self, day, author, grupo):
 
-        sql_links = f"SELECT P.id,owner,link,count(id_post) from posts P inner join sprinters S on P.owner=S.sprinter left join (select * from comments where author='{author}' and message='') C on P.id=C.id_post WHERE S.grupo='{grupo}' and day='{day}' group by P.id ORDER BY owner"
+        sql_links = f"SELECT P.id,owner,link,sum(tot_comm), sum(auth_comm) from posts P inner join sprinters S on P.owner=S.sprinter left join (select id_post,author, sum(case when author='{author}' then 1 end) as auth_comm, count(*) as tot_comm from comments where message='' group by id_post) C on P.id=C.id_post WHERE S.grupo='{grupo}' and day='{day}' GROUP BY P.id ORDER BY owner"
         print(sql_links)
         lnk = self.conn.cursor()
         lnk.execute(sql_links)
         links = lnk.fetchall()
         return links
+
+    def get_myposts(self, author):
+
+        sql_links = f"SELECT P.id, day, owner, link, start_date, num_views, num_likes, num_comments, count(id_post) from posts P inner join sprinters S on P.owner=S.sprinter left join (select * from comments where message='') C on P.id=C.id_post WHERE P.owner='{author}' group by P.id,owner,link ORDER BY day"
+        print(sql_links)
+        lnk = self.conn.cursor()
+        lnk.execute(sql_links)
+        links = lnk.fetchall()
+        return links
+
+    def delete_post(self, id_post):
+        sql_delete=f"DELETE FROM posts where id={id_post}"
+        print(sql_delete)
+        lnk_del = self.conn.cursor()
+        lnk_del.execute(sql_delete)
+        self.conn.commit()
+
+    def edit_post(self, id_post, link, num_views, num_likes, num_comments):
+        sql_edit=f"UPDATE posts SET link='{link}', num_views='{num_views}', num_likes='{num_likes}', num_comments='{num_comments}' where id={id_post}"
+        print(sql_edit)
+        lnk_edt = self.conn.cursor()
+        lnk_edt.execute(sql_edit)
+        self.conn.commit()
+
+    def get_post(self, id_post):
+
+        sql_post = f"SELECT id, link, num_views, num_likes, num_comments from posts where id={id_post}"
+        print(sql_post)
+        pst = self.conn.cursor()
+        pst.execute(sql_post)
+        return pst.fetchone()
 
     def get_liuser(self, author):
 
