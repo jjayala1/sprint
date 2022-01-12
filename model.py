@@ -5,8 +5,9 @@ import sqlite3
 class Modelo:
 
     def abre_conexion(self):
-        self.connection =  sqlite3.connect('sprint.db', check_same_thread = False)
-        #self.connection =  sqlite3.connect('/home/sprintOct21/sprint/sprint.db', check_same_thread = False)
+        self.ruta = './'
+        #self.ruta = '/home/sprintOct21/sprint'
+        self.connection = self.create_database(f'{self.ruta}/sprint.db');
         self.cursor = self.connection.cursor()
 
     def cierra_conexion(self):
