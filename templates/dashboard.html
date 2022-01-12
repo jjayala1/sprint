@@ -14,8 +14,14 @@
 <body>
     <!-- h1>LinkedIn Sprint Thomas Kuegler October 2021</h1 -->
     <br>
+    <input type="button" value='Templates' class="btn btn-primary" onclick="location.href='/templates'" >
+    <input type="button" value='Track' class="btn btn-primary" onclick="location.href='/track'" >
+    <input type="button" value='Stats' class="btn btn-primary" onclick="location.href='/stats'" >
+    <br>
+    <br>
 
     <form name="nueva" method="post" class="form-inline" action="/new_post">
+
         <div class="input-group input-group-sm col-2">
             <div class="input-group-prepend">
                 <span class="input-group-text" id="inputGroup2">Day(1-30)</span>
@@ -27,14 +33,9 @@
                 <span class="input-group-text" id="inputGroup2">URL:</span>
             </div>
             <input type="url" id="new_link" name="new_link" placeholder="LinkedIn URL" class="form-control">
-            <!-- <input type="submit" value='Send' class="btn btn-success"> -->
+            <input type="submit" value='Send' class="btn btn-success">
         </div>
 
-        <div class="input-group input-group-sm col-2">
-            <input type="button" value='Templates' class="btn btn-primary" onclick="location.href='/templates'" >
-            <input type="button" value='Track' class="btn btn-primary" onclick="location.href='/track'" >
-            <input type="button" value='Stats' class="btn btn-primary" onclick="location.href='/stats'" >
-        </div>
     </form>
 
     <form name="nueva" method="post" class="form-inline" action="/dashboard">

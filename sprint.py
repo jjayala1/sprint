@@ -14,6 +14,7 @@ class Sprint():
         self.file = file
         self.link = link
         self.ruta = './'
+        #self.ruta = '/home/sprintOct21/sprint'
         self.conn = self.create_database(f'{self.ruta}/sprint.db');
         self.create_tables()
         self.data = ''
@@ -179,18 +180,18 @@ class Sprint():
 
         return sprinters, pivot
 
-    def new_post(self, day, link):
+    def new_post(self, day, link, owner):
 
         x = datetime.datetime.now()
         curtime = x.strftime("%Y-%m-%d %X")
 
-        sql = 'REPLACE INTO posts(day, link, start_date) VALUES(?, ?, ?);'
+        sql = 'REPLACE INTO posts(day, link, owner, start_date) VALUES(?, ?, ?, ?);'
         cur = self.conn.cursor()
-        cur.execute(sql, (day, link, curtime))
+        cur.execute(sql, (day, link, owner, curtime))
         self.conn.commit()
         self.day = day
         self.link = link
-        self.main()
+        #self.main()
         return cur.lastrowid
 
     def get_sprinters(self):
@@ -212,6 +213,15 @@ class Sprint():
         lnk.execute(sql_links)
         links = lnk.fetchall()
         return links
+
+    def get_liuser(self, author):
+
+        sql_liusr = f"SELECT liuser from users where username='{author}'"
+        print(sql_liusr)
+        liu = self.conn.cursor()
+        liu.execute(sql_liusr)
+        liusr = liu.fetchall()
+        return liusr[0][0]
 
     def data_likes(self, day='%', owner='%'):
 

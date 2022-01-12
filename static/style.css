@@ -2,7 +2,7 @@ html, body {
     background-color: #19191d;
 }
 
-h1, h2, span {
+h1, h2, span, label {
     color: white;
     text-align: center;
 }

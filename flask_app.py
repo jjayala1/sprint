@@ -1,11 +1,48 @@
 from flask import Flask, render_template, request, session, redirect, url_for
-import sprint
 import json
+from datetime import date
+import sprint, model
 
 app = Flask(__name__)
 app.secret_key = "NzFiZjVjNTQzODAwYThkMWVhNGMwZWI0"
 
 @app.route('/', methods=['GET', 'POST'])
+def home():
+
+    if request.method == 'GET':
+        session.clear()
+        return render_template('index.html', mensaje='' )
+
+    if request.method == 'POST':
+        modelo = model.Modelo()
+        username = request.form['username']
+        password = request.form['password']
+        codigo, mensaje = modelo.valida_acceso(username, password)
+
+        if codigo == 1:
+            session['username'] = username
+            return redirect(url_for('track'))
+        else:
+            return render_template('index.html', mensaje=mensaje )
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+
+    if request.method == 'GET':
+        return render_template('signup.html')
+
+    if request.method == 'POST' and request.form['accion'] == 'signup':
+        username = request.form['username']
+        password = request.form['password']
+        modelo = model.Modelo()
+        codigo, mensaje = modelo.signup(username, password)
+
+        if codigo == 0:
+            return render_template('signup.html', mensaje=mensaje )
+
+    return redirect(url_for('home'))
+
+
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     datos = sprint.Sprint()
@@ -58,34 +95,34 @@ def new_post():
         day = request.form['day_number']
         link = request.form['new_link']
         datos = sprint.Sprint()
-        datos.new_post(day, link)
-        return render_template('new_post.html' )
+        datos.new_post(day, link, session['author'])
+        return redirect(url_for('track'))
+        #return render_template('new_post.html' )
 
 
 @app.route('/track', methods=['GET','POST'])
 def track():
     datos = sprint.Sprint()
-
+    username = session['username']
+    author = datos.get_liuser(username)
+    session['author'] = author
 
     if request.method == 'GET':
-        day = '%'
-        author = 'Ana Bullard'
+        d1 = date(2022, 1, 9)
+        d2 = date.today()
+        day = (d2 - d1).days
 
     if request.method == 'POST':
 
         if 'filter_day' in request.form:
             day = request.form['filter_day']
 
-        if 'author' in request.form:
-            author = request.form['author']
-
         data = request.json
 
         if data:
             day = data[0]['day']
-            author = data[1]['author']
-            id_post = data[2]['id_post']
-            action = data[3]['action']
+            id_post = data[1]['id_post']
+            action = data[2]['action']
             datos.insert_comments2(day, id_post, author, '', action)
 
     links = datos.get_links(day, author)
@@ -116,7 +153,7 @@ def chart():
     return render_template('chart.html', dataset=dataset, day_sel=day, owner_sel=owner, sprinters=sprinters, num_likes=num_likes, num_comments=num_comments)
 
 if __name__ == '__main__':
-    app.run(port=8002, debug=True)
+    app.run(host='0.0.0.0', port=8002, debug=True)
 
 
 

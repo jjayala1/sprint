@@ -13,11 +13,30 @@
 </head>
 
 <body>
-    <!-- h1>LinkedIn Sprint Thomas Kuegler October 2021</h1 -->
-    <br>
+    <h1>LinkedIn Sprint Thomas Kuegler January 2022</h1>
+    <button class='btn btn-primary' onclick="location.href='/dashboard'">Dashboard</button>
+    <button class='btn btn-primary' onclick="location.href='/stats'">Stats</button>
+    <button class='btn btn-primary' onclick="location.href='/templates'">Templates</button>
+    <br><p>
+
+    <form name="nueva" method="post" class="form-inline" action="/new_post">
+
+        <div class="input-group input-group-sm col-2">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup2">Day(1-30)</span>
+            </div>
+            <input type="number" id="day_number" name="day_number" min="1" max="30" value={{day_sel}} class="form-control" aria-label="Small" aria-describedby="inputGroup2">
+        </div>
+        <div class="input-group input-group-sm col-8">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup2">URL:</span>
+            </div>
+            <input type="url" id="new_link" name="new_link" placeholder="LinkedIn URL" class="form-control">
+            <input type="submit" value='Send' class="btn btn-success">
+        </div>
+    </form>
 
     <form name="nueva" method="post" class="form-inline" action="/track">
-        {% print(day_sel) %}
         <div class="input-group input-group-sm col-2">
             <div class="input-group-prepend">
                 <span class="input-group-text" id="inputGroup3">Day:</span>
@@ -29,8 +48,9 @@
                 {% endfor%}
             </select>
         </div>
+    <label class='alert' name='author' id='author'>{{author}} Track your comments</label>
     <br><p>
-    <input type='text' name='author' id='author' value='{{author}}'>
+    <br><p>
     </form>
 
     <table class='table table-bordered table-striped table-hover table-sm table-responsive table-dark'>
