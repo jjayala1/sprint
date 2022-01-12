@@ -25,18 +25,21 @@ class Modelo:
             #exc_type, exc_value, exc_tb = sys.exc_info()
             #print(traceback.format_exception(exc_type, exc_value, exc_tb))
 
-    def signup(self, username, password):
+    def signup(self, username, password, profile, liuser, sprint_number, grupo):
 
         self.query(f"SELECT pk from users where username='{username}' order by pk DESC")
         exist = self.cursor.fetchone()
+        print("dasdsadkasdajnsda")
 
         if exist == None:
-            self.query(f"INSERT INTO USERS(username, password) VALUES('{username}', '{password}')")
+            self.query(f"INSERT INTO users(username, password, liuser) VALUES('{username}', '{password}', '{liuser}')")
+            self.query(f"INSERT INTO sprinters(sprinter, profile, sprint_number, grupo) VALUES('{liuser}', '{profile}', '{sprint_number}', '{grupo}')")
             mensaje = [1, f'Usuario {username} Registrado Exitosamente']
 
         else:
             mensaje = [0, f'Usuario {username} ya existe, elige otro.']
 
+        print(mensaje)
         self.cierra_conexion()
         return mensaje
 
@@ -53,11 +56,12 @@ class Modelo:
         return users
 
     def valida_acceso(self, username, password):
-        query = f"SELECT username, password from users where username='{username}' and password='{password}' order by pk DESC"
+        query = f"SELECT username, password, sprinter, grupo from users U inner join sprinters S on U.liuser=S.sprinter where username='{username}' and password='{password}' order by pk DESC"
         self.query(query)
 
         existe = self.cursor.fetchone()
-        mensaje = [0, 'User/password incorrect'] if existe is None else [1, 'Usuario Válido']
+        print(existe)
+        mensaje = [0, 'User/password incorrect', '', ''] if existe is None else [1, 'Usuario Válido', existe[2], existe[3]]
 
         self.cierra_conexion()
         return mensaje

@@ -176,6 +176,7 @@ class Sprint():
                         order by P.owner;
                      """
         spr.execute(sql_pivot)
+        print(sql_pivot)
         pivot = spr.fetchall()
 
         return sprinters, pivot
@@ -205,9 +206,9 @@ class Sprint():
             sprinters.append(s[0])
         return sprinters
 
-    def get_links(self, day, author):
+    def get_links(self, day, author, grupo):
 
-        sql_links = f"SELECT P.id,owner,link,count(id_post) from posts P left join comments C on P.id=C.id_post WHERE day='{day}' and (author like '{author}' or author is null) and (message='' or message is null) group by P.id ORDER BY owner"
+        sql_links = f"SELECT P.id,owner,link,count(id_post) from posts P inner join sprinters S on P.owner=S.sprinter left join (select * from comments where author='{author}' and message='') C on P.id=C.id_post WHERE S.grupo='{grupo}' and day='{day}' group by P.id ORDER BY owner"
         print(sql_links)
         lnk = self.conn.cursor()
         lnk.execute(sql_links)

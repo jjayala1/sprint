@@ -6,6 +6,7 @@
   <title>TODO LISTS</title>
   <meta name="description" content="HTML5 Template">
   <meta name="author" content="JJJA">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <link rel="stylesheet" href="static/style.css?v=1.0">
 
 </head>
@@ -13,14 +14,60 @@
 <body>
     <h1>Create Account</h1>
     <br>
-    <form name='signup' method='post'>
+
+    <form name="signup" method="post" class="form-inline">
         <input name='accion' type='hidden'>
-        <input placeholder='User' name='username' type='text'><br>
-        <input placeholder='Password' name='password' type='password'><br>
-        <button onclick="document.signup.accion.value='signup';">Create</button>
-        <button onclick="document.signup.accion.value='cancelar';">Cancel</button>
+
+        <div class="input-group input-group-sm col-8">
+            <div class="input-group-prepend-sm">
+                <span class="input-group-text" id="inputGroup2">User:</span>
+            </div>
+            <input size=20 type="text" id="username" name="username" placeholder="Username" class="form-control" required>
+        </div>
+
+        <div class="input-group input-group-sm col-8">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup2">Password:</span>
+            </div>
+            <input type="password" id="password" name="password" placeholder="Password" class="form-control" required>
+        </div>
+        <br><p>
+        <div class="input-group input-group-sm col-8">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup2">LinkedIn Profile:</span>
+            </div>
+            <input type="url" id="profile" name="profile" placeholder="LinkedIn Profile" class="form-control" required>
+        </div>
+        <div class="input-group input-group-sm col-8">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup2">LinkedIn User:</span>
+            </div>
+            <input type="text" id="liuser" name="liuser" placeholder="LinkedIn User" class="form-control" required>
+        </div>
+        <div class="input-group input-group-sm col-8">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup2">Assigned Group:</span>
+            </div>
+            <select name='group' id='group' class="form-control" required>
+                <option value='A'>A</option>
+                <option value='B'>B</option>
+                <option value='C'>C</option>
+            </select>
+        </div>
+        <div class="input-group input-group-sm col-8">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup2">This is my sprint #:</span>
+            </div>
+            <input type="number" id="sprint_number" name="sprint_number" min="1" max="3" value=1 class="form-control" aria-label="Small" aria-describedby="inputGroup2" class="form-control" required>
+        </div>
+        <div class="input-group input-group-sm col-8">
+            <p>
+        </div>
+        <div class="input-group input-group-sm col-8">
+            <button class='btn btn-primary' onclick="document.signup.accion.value='signup';">Create</button>
+            <button class='btn btn-warning' onclick="document.signup.accion.value='cancelar';">Cancel</button>
+        </div>
     </form>
     <p>{{ mensaje }}</p>
-
 </body>
 

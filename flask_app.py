@@ -17,10 +17,12 @@ def home():
         modelo = model.Modelo()
         username = request.form['username']
         password = request.form['password']
-        codigo, mensaje = modelo.valida_acceso(username, password)
+        codigo, mensaje, liuser, grupo = modelo.valida_acceso(username, password)
 
         if codigo == 1:
             session['username'] = username
+            session['author'] = liuser
+            session['grupo'] = grupo
             return redirect(url_for('track'))
         else:
             return render_template('index.html', mensaje=mensaje )
@@ -34,8 +36,12 @@ def signup():
     if request.method == 'POST' and request.form['accion'] == 'signup':
         username = request.form['username']
         password = request.form['password']
+        profile = request.form['profile']
+        liuser = request.form['liuser']
+        sprint_number = request.form['sprint_number']
+        group = request.form['group']
         modelo = model.Modelo()
-        codigo, mensaje = modelo.signup(username, password)
+        codigo, mensaje = modelo.signup(username, password, profile, liuser, sprint_number, group)
 
         if codigo == 0:
             return render_template('signup.html', mensaje=mensaje )
@@ -104,8 +110,9 @@ def new_post():
 def track():
     datos = sprint.Sprint()
     username = session['username']
-    author = datos.get_liuser(username)
-    session['author'] = author
+    #author = datos.get_liuser(username)
+    author = session['author']
+    grupo = session['grupo']
 
     if request.method == 'GET':
         d1 = date(2022, 1, 9)
@@ -125,7 +132,7 @@ def track():
             action = data[2]['action']
             datos.insert_comments2(day, id_post, author, '', action)
 
-    links = datos.get_links(day, author)
+    links = datos.get_links(day, author, grupo)
 
     return render_template('track.html', day_sel=day, links=links, author=author)
 
