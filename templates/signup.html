@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>TODO LISTS</title>
+  <meta name="description" content="HTML5 Template">
+  <meta name="author" content="JJJA">
+  <link rel="stylesheet" href="static/style.css?v=1.0">
+
+</head>
+
+<body>
+    <h1>Create Account</h1>
+    <br>
+    <form name='signup' method='post'>
+        <input name='accion' type='hidden'>
+        <input placeholder='User' name='username' type='text'><br>
+        <input placeholder='Password' name='password' type='password'><br>
+        <button onclick="document.signup.accion.value='signup';">Create</button>
+        <button onclick="document.signup.accion.value='cancelar';">Cancel</button>
+    </form>
+    <p>{{ mensaje }}</p>
+
+</body>
+
