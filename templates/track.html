@@ -33,13 +33,16 @@
             </select>
         </div>
     <label class='alert' name='author' id='author'>{{author}} Track your comments</label>
+    <span class="badge badge-success" id="progress">1/25</span>
     <br><p>
     <br><p>
     </form>
 
+
     <table class='table table-bordered table-striped table-hover table-sm table-responsive table-dark'>
         <thead>
             <tr class='bg-success'>
+                <th>No.</th>
                 <th>Owner</th>
                 <th>Comments</th>
                 <th>Check</th>
@@ -48,6 +51,7 @@
         <tbody>
         {% for link in links %}
             <tr>
+                <td>{{loop.index0+1}}</td>
                 <td> <a target='post' href='{{link[2]}}'>{{link[1]}}</a></td>
                 <td>{{link[3]}}</td>
                 <td><input class='check' type='checkbox' name='id_post' id='{{link[0]}}' value='{{link[0]}}' {% if link[4]|int > 0 %} checked {% endif %}></td>

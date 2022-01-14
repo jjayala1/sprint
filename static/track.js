@@ -25,4 +25,8 @@ $(document).ready(function(){
         });
     });
 
+    var checked = $("input:checkbox:checked").length
+    var total = $("input:checkbox").length
+    $("#progress").html(checked + '/' + total)
+
 });
