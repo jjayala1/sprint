@@ -106,40 +106,6 @@ def new_post():
         #return render_template('new_post.html' )
 
 
-@app.route('/delete_post', methods=['GET','POST'])
-def delete_post():
-
-    if request.method == 'GET':
-        id_post = request.args['id_post']
-        print(id_post)
-        datos = sprint.Sprint()
-        datos.delete_post(id_post)
-    return redirect(request.referrer)
-
-@app.route('/edit_post', methods=['GET','POST'])
-def edit_post():
-
-    if request.method == 'GET':
-        datos = sprint.Sprint()
-        id_post = request.args['id_post']
-        datos_post = datos.get_post(id_post)
-        sprinters = datos.get_sprinters()
-        print(datos_post)
-        return render_template('edit.html', datos=datos_post, sprinters=sprinters)
-
-    if request.method == 'POST':
-        #and request.form['accion'] == 'edit':
-        print(request.form['accion'])
-        id_post = request.form['id_post']
-        link = request.form['link']
-        num_views = request.form['num_views']
-        num_likes = request.form['num_likes']
-        num_comments = request.form['num_comments']
-        owner = request.form['owner_sel']
-        datos = sprint.Sprint()
-        datos.edit_post(id_post, link, num_views, num_likes, num_comments, owner)
-        return redirect(url_for('myposts'))
-
 @app.route('/track', methods=['GET','POST'])
 def track():
     datos = sprint.Sprint()
@@ -191,6 +157,76 @@ def myposts():
     links = datos.get_myposts(author)
     return render_template('myposts.html', day_sel=day, links=links, author=author)
 
+@app.route('/edit_post', methods=['GET','POST'])
+def edit_post():
+
+    if request.method == 'GET':
+        datos = sprint.Sprint()
+        id_post = request.args['id_post']
+        datos_post = datos.get_post(id_post)
+        sprinters = datos.get_sprinters()[0]
+        print(datos_post)
+        return render_template('edit_post.html', datos=datos_post, sprinters=sprinters)
+
+    if request.method == 'POST':
+        #and request.form['accion'] == 'edit':
+        print(request.form['accion'])
+        id_post = request.form['id_post']
+        link = request.form['link']
+        num_views = request.form['num_views']
+        num_likes = request.form['num_likes']
+        num_comments = request.form['num_comments']
+        owner = request.form['owner_sel']
+        datos = sprint.Sprint()
+        datos.edit_post(id_post, link, num_views, num_likes, num_comments, owner)
+        return redirect(url_for('myposts'))
+
+@app.route('/delete_post', methods=['GET','POST'])
+def delete_post():
+
+    if request.method == 'GET':
+        id_post = request.args['id_post']
+        print(id_post)
+        datos = sprint.Sprint()
+        datos.delete_post(id_post)
+    return redirect(request.referrer)
+
+@app.route('/sprinters', methods=['GET','POST'])
+def sprinters():
+
+    datos = sprint.Sprint()
+    sprinters = datos.get_sprinters()[1]
+    return render_template('sprinters.html', sprinters=sprinters)
+
+@app.route('/edit_sprinter', methods=['GET','POST'])
+def edit_sprinter():
+
+    if request.method == 'GET':
+        datos = sprint.Sprint()
+        id_sprinter = request.args['id_sprinter']
+        datos_sprinter = datos.get_sprinter(id_sprinter)
+        print(datos_sprinter)
+        return render_template('edit_sprinter.html', datos=datos_sprinter)
+
+    if request.method == 'POST':
+        id_sprinter = request.form['id_sprinter']
+        sprinter = request.form['sprinter']
+        profile = request.form['profile']
+        sprint_number = request.form['sprint_number']
+        group = request.form['group']
+        datos = sprint.Sprint()
+        datos.edit_sprinter(id_sprinter, sprinter, profile, sprint_number, group)
+        return redirect(url_for('sprinters'))
+
+@app.route('/delete_sprinter', methods=['GET','POST'])
+def delete_sprinter():
+
+    if request.method == 'GET':
+        id_sprinter = request.args['id_sprinter']
+        datos = sprint.Sprint()
+        datos.delete_sprinter(id_sprinter)
+    return redirect(request.referrer)
+
 @app.route("/stats", methods=['GET', 'POST'])
 def chart():
 
@@ -204,7 +240,7 @@ def chart():
         owner = '%'
 
     datos = sprint.Sprint()
-    sprinters = datos.get_sprinters()
+    sprinters = datos.get_sprinters()[0]
     dataset, num_likes, num_comments = datos.data_likes(day, owner)
     print('Datos:', dataset)
     print('Likes:', num_likes)

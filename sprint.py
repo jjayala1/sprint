@@ -198,14 +198,15 @@ class Sprint():
 
     def get_sprinters(self):
 
-        sql_sprinters = f"SELECT sprinter from sprinters order by sprinter"
+        sql_sprinters = f"SELECT * from sprinters order by sprinter"
         spr = self.conn.cursor()
         spr.execute(sql_sprinters)
-        sprinters = []
+        sprinters = spr.fetchall()
+        sprinters_name = []
 
-        for s in spr:
-            sprinters.append(s[0])
-        return sprinters
+        for s in sprinters:
+            sprinters_name.append(s[0])
+        return sprinters_name, sprinters
 
     def get_links(self, day, author, grupo):
 
@@ -225,20 +226,9 @@ class Sprint():
         links = lnk.fetchall()
         return links
 
-    def delete_post(self, id_post):
-        sql_delete=f"DELETE FROM posts where id={id_post}"
-        print(sql_delete)
-        lnk_del = self.conn.cursor()
-        lnk_del.execute(sql_delete)
-        self.conn.commit()
-
-    def edit_post(self, id_post, link, num_views, num_likes, num_comments, owner):
-        sql_edit=f"UPDATE posts SET owner='{owner}', link='{link}', num_views='{num_views}', num_likes='{num_likes}', num_comments='{num_comments}' where id={id_post}"
-        print(sql_edit)
-        lnk_edt = self.conn.cursor()
-        lnk_edt.execute(sql_edit)
-        self.conn.commit()
-
+#######################################################################################################################
+##########################################ABC POST#################################################################
+#######################################################################################################################
     def get_post(self, id_post):
 
         sql_post = f"SELECT id, owner, link, num_views, num_likes, num_comments from posts where id={id_post}"
@@ -247,8 +237,43 @@ class Sprint():
         pst.execute(sql_post)
         return pst.fetchone()
 
-    def get_liuser(self, author):
+    def edit_post(self, id_post, link, num_views, num_likes, num_comments, owner):
+        sql_edit=f"UPDATE posts SET owner='{owner}', link='{link}', num_views='{num_views}', num_likes='{num_likes}', num_comments='{num_comments}' where id={id_post}"
+        print(sql_edit)
+        lnk_edt = self.conn.cursor()
+        lnk_edt.execute(sql_edit)
+        self.conn.commit()
 
+    def delete_post(self, id_post):
+        sql_delete=f"DELETE FROM posts where id={id_post}"
+        print(sql_delete)
+        lnk_del = self.conn.cursor()
+        lnk_del.execute(sql_delete)
+        self.conn.commit()
+
+#######################################################################################################################
+##########################################ABC SPRINTER#################################################################
+#######################################################################################################################
+    def get_sprinter(self, id_sprinter):
+
+        sql_spt = f"SELECT * from sprinters where id={id_sprinter}"
+        spt = self.conn.cursor()
+        spt.execute(sql_spt)
+        return spt.fetchone()
+
+    def edit_sprinter(self, id_sprinter, sprinter, profile, sprint_number, group):
+        sql_edit=f"UPDATE sprinters SET sprinter='{sprinter}', profile='{profile}', sprint_number='{sprint_number}', grupo='{group}' where id={id_sprinter}"
+        lnk_edt = self.conn.cursor()
+        lnk_edt.execute(sql_edit)
+        self.conn.commit()
+
+    def delete_sprinter(self, id_sprinter):
+        sql_delete=f"DELETE FROM sprinters where id={id_sprinter}"
+        lnk_del = self.conn.cursor()
+        lnk_del.execute(sql_delete)
+        self.conn.commit()
+
+    def get_liuser(self, author):
         sql_liusr = f"SELECT liuser from users where username='{author}'"
         print(sql_liusr)
         liu = self.conn.cursor()

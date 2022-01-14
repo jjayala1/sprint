@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Dashboard Sprint</title>
+  <meta name="description" content="HTML5 Template">
+  <meta name="author" content="JJJA">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="static/style.css?v=1.0">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src='static/track.js'></script>
+</head>
+
+<body>
+    <h1>LinkedIn Sprint Thomas Kuegler January 2022</h1>
+    <button class='btn btn-primary' onclick="location.href='/dashboard'">Dashboard</button>
+    <button class='btn btn-primary' onclick="location.href='/stats'">Stats</button>
+    <button class='btn btn-primary' onclick="location.href='/track'">Track</button>
+    <button class='btn btn-primary' onclick="location.href='/myposts'">My Posts</button>
+    <button class='btn btn-primary' onclick="location.href='/templates'">Templates</button>
+    <br><p>
+
+    <table class='table table-bordered table-striped table-hover table-sm table-responsive table-dark'>
+        <thead>
+            <tr class='bg-success'>
+                <th>#</th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Profile</th>
+                <th>Sprint #</th>
+                <th>Group</th>
+                <th>Open</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for sprinter in sprinters %}
+            <tr>
+                <td>{{loop.index0+1}}</td>
+                <td>{{sprinter[0]}}</td>
+                <td>{{sprinter[1]}}</td>
+                <td>{{sprinter[2]}}</td>
+                <td>{{sprinter[3]}}</td>
+                <td>{{sprinter[4]}}</td>
+                <td {% if sprinter[2] != None %} onclick="window.open('{{sprinter[2]}}','sprinter')"><img src='static/open.png'>{% endif %}</td>
+                <td><a href='/edit_sprinter?id_sprinter={{sprinter[0]}}'><img src='static/edit.png'></td>
+                <td><a href='/delete_sprinter?id_sprinter={{sprinter[0]}}'><img src='static/erase.png'></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+
+</body>
+
+
