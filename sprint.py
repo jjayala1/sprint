@@ -232,8 +232,8 @@ class Sprint():
         lnk_del.execute(sql_delete)
         self.conn.commit()
 
-    def edit_post(self, id_post, link, num_views, num_likes, num_comments):
-        sql_edit=f"UPDATE posts SET link='{link}', num_views='{num_views}', num_likes='{num_likes}', num_comments='{num_comments}' where id={id_post}"
+    def edit_post(self, id_post, link, num_views, num_likes, num_comments, owner):
+        sql_edit=f"UPDATE posts SET owner='{owner}', link='{link}', num_views='{num_views}', num_likes='{num_likes}', num_comments='{num_comments}' where id={id_post}"
         print(sql_edit)
         lnk_edt = self.conn.cursor()
         lnk_edt.execute(sql_edit)
@@ -241,7 +241,7 @@ class Sprint():
 
     def get_post(self, id_post):
 
-        sql_post = f"SELECT id, link, num_views, num_likes, num_comments from posts where id={id_post}"
+        sql_post = f"SELECT id, owner, link, num_views, num_likes, num_comments from posts where id={id_post}"
         print(sql_post)
         pst = self.conn.cursor()
         pst.execute(sql_post)

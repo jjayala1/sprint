@@ -12,7 +12,7 @@
 </head>
 
 <body>
-    <h2>EDIT POST {{id_post}}</h2>
+    <h2>Edit Post {{datos[0]}}</h2>
     <br>
 
     <form name="signup" method="post" class="form-inline">
@@ -24,30 +24,39 @@
             </div>
             <input size=20 type="text" id="id_post" name="id_post" placeholder="" class="form-control" value='{{datos[0]}}' required>
         </div>
-
+        <div class="input-group input-group-sm col-8">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup2">Owner</span>
+            </div>
+            <select name='owner_sel' class="form-control" required>
+                {% for sp in sprinters %}
+                    <option {% if datos[1] == sp %} selected {% endif %} value="{{sp}}">{{sp}}</option>
+                {% endfor%}
+            </select>
+        </div>
         <div class="input-group input-group-sm col-8">
             <div class="input-group-prepend">
                 <span class="input-group-text" id="inputGroup2">Link:</span>
             </div>
-            <input type="url" id="link" name="link" placeholder="Link" class="form-control" value='{{datos[1]}}' required>
+            <input type="url" id="link" name="link" placeholder="Link" class="form-control" value='{{datos[2]}}' required>
         </div>
         <div class="input-group input-group-sm col-8">
             <div class="input-group-prepend">
                 <span class="input-group-text" id="inputGroup2">Views:</span>
             </div>
-            <input type="number" id="num_views" name="num_views" placeholder="Views" class="form-control" value='{{datos[2]}}'>
+            <input type="number" id="num_views" name="num_views" placeholder="Views" class="form-control" value='{{datos[3]}}'>
         </div>
         <div class="input-group input-group-sm col-8">
             <div class="input-group-prepend">
                 <span class="input-group-text" id="inputGroup2">Reactions:</span>
             </div>
-            <input type="number" id="num_likes" name="num_likes" placeholder="Likes" class="form-control" value='{{datos[3]}}'>
+            <input type="number" id="num_likes" name="num_likes" placeholder="Likes" class="form-control" value='{{datos[4]}}'>
         </div>
         <div class="input-group input-group-sm col-8">
             <div class="input-group-prepend">
                 <span class="input-group-text" id="inputGroup2">Comments:</span>
             </div>
-            <input type="number" id="num_comments" name="num_comments" placeholder="Comments" class="form-control" value='{{datos[4]}}' >
+            <input type="number" id="num_comments" name="num_comments" placeholder="Comments" class="form-control" value='{{datos[5]}}' >
         </div>
 
         <div class="input-group input-group-sm col-8">

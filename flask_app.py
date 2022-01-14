@@ -123,8 +123,9 @@ def edit_post():
         datos = sprint.Sprint()
         id_post = request.args['id_post']
         datos_post = datos.get_post(id_post)
+        sprinters = datos.get_sprinters()
         print(datos_post)
-        return render_template('edit.html', datos=datos_post)
+        return render_template('edit.html', datos=datos_post, sprinters=sprinters)
 
     if request.method == 'POST':
         #and request.form['accion'] == 'edit':
@@ -134,8 +135,9 @@ def edit_post():
         num_views = request.form['num_views']
         num_likes = request.form['num_likes']
         num_comments = request.form['num_comments']
+        owner = request.form['owner_sel']
         datos = sprint.Sprint()
-        datos.edit_post(id_post, link, num_views, num_likes, num_comments)
+        datos.edit_post(id_post, link, num_views, num_likes, num_comments, owner)
         return redirect(url_for('myposts'))
 
 @app.route('/track', methods=['GET','POST'])
