@@ -21,15 +21,32 @@
     <button class='btn btn-primary' onclick="location.href='/templates'">Templates</button>
     <br><p>
 
-    <form name="nueva" method="post" class="form-inline" action="/new_post">
+    <form name="fowner" method="post" class="form-inline">
+        <div class="input-group input-group-sm col-4">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup2">Sprinter:</span>
+            </div>
+            <select name='owner_sel' class="form-control" onchange="document.fnewpost.fauthor.value=this.options[this.selectedIndex].value;submit()" required>
+                {% if username == 'jjayala' %}
+                    {% for sp in sprinters %}
+                    <option {% if owner_sel == sp %} selected {% endif %} value="{{sp}}">{{sp}}</option>
+                    {% endfor%}
+                {% else %}
+                    <option value="{{author}}">{{author}}</option>
+                {% endif %}
+            </select>
+        </div>
+    </form>
 
+    <form name="fnewpost" method="post" class="form-inline" action="/new_post">
+        <input type="hidden" name="fauthor" value="{{owner_sel}}">
         <div class="input-group input-group-sm col-2">
             <div class="input-group-prepend">
                 <span class="input-group-text" id="inputGroup2">Day(1-30)</span>
             </div>
             <input type="number" id="day_number" name="day_number" min="1" max="30" value={{day_sel}} class="form-control" aria-label="Small" aria-describedby="inputGroup2">
         </div>
-        <div class="input-group input-group-sm col-8">
+        <div class="input-group input-group-sm col-6">
             <div class="input-group-prepend">
                 <span class="input-group-text" id="inputGroup2">URL:</span>
             </div>
@@ -38,12 +55,12 @@
         </div>
     </form>
     <br><p>
-    <br><p>
 
     <table class='table table-bordered table-striped table-hover table-sm table-responsive table-dark'>
         <thead>
             <tr class='bg-success'>
                 <th>Day</th>
+                <th>Sprinter</th>
                 <th>Date/Time</th>
                 <th>Views</th>
                 <th>Reactions</th>
@@ -59,6 +76,7 @@
         {% for link in links %}
             <tr>
                 <td>{{link[1]}}</td>
+                <td>{{link[2]}}</td>
                 <td>{{link[4]}}</td>
                 <td>{{link[5]}}</td>
                 <td>{{link[6]}}</td>

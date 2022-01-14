@@ -100,8 +100,9 @@ def new_post():
     if request.method == 'POST':
         day = request.form['day_number']
         link = request.form['new_link']
+        owner = request.form['fauthor']
         datos = sprint.Sprint()
-        datos.new_post(day, link, session['author'])
+        datos.new_post(day, link, owner)
         return redirect(request.referrer)
         #return render_template('new_post.html' )
 
@@ -144,6 +145,11 @@ def myposts():
     author = session['author']
     grupo = session['grupo']
 
+    if 'owner_sel' in session:
+        owner_sel = session['owner_sel']
+    else:
+        owner_sel =  author
+
     d1 = date(2022, 1, 9)
     d2 = date.today()
     day = (d2 - d1).days
@@ -152,10 +158,13 @@ def myposts():
         pass
 
     if request.method == 'POST':
-        pass
+        owner_sel = request.form['owner_sel']
+        session['owner_sel'] = owner_sel
+        print(owner_sel)
 
-    links = datos.get_myposts(author)
-    return render_template('myposts.html', day_sel=day, links=links, author=author)
+    links = datos.get_myposts(owner_sel)
+    sprinters = datos.get_sprinters()[0]
+    return render_template('myposts.html', day_sel=day, links=links, sprinters=sprinters, author=author, owner_sel=owner_sel, username=session['username'])
 
 @app.route('/edit_post', methods=['GET','POST'])
 def edit_post():
