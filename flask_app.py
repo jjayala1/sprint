@@ -119,6 +119,7 @@ def track():
         d1 = date(2022, 1, 9)
         d2 = date.today()
         day = (d2 - d1).days
+        owner_sel = '%'
 
     if request.method == 'POST':
 
