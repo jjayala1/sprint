@@ -236,7 +236,7 @@ class Sprint():
         sprinters_name = []
 
         for s in sprinters:
-            sprinters_name.append(s[1])
+            sprinters_name.append(s[3])
         return sprinters_name, sprinters
 
     def get_links(self, day, owner, author, grupo):
