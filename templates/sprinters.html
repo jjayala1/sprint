@@ -44,7 +44,7 @@
                 <td>{{sprinter[2]}}</td>
                 <td>{{sprinter[3]}}</td>
                 <td>{{sprinter[4]}}</td>
-                <td {% if sprinter[2] != None %} onclick="window.open('{{sprinter[2]}}','sprinter')"><img src='static/open.png'>{% endif %}</td>
+                <td> {% if sprinter[2] != None %} <a href='{{sprinter[2]}}' target='sprinter'><img src='static/open.png'></a>{% endif %}</td>
                 <td><a href='/edit_sprinter?id_sprinter={{sprinter[0]}}'><img src='static/edit.png'></td>
                 <td><a href='/delete_sprinter?id_sprinter={{sprinter[0]}}'><img src='static/erase.png'></td>
             </tr>
