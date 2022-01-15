@@ -198,7 +198,7 @@ class Sprint():
 
     def get_sprinters(self):
 
-        sql_sprinters = f"SELECT * from sprinters order by sprinter"
+        sql_sprinters = f"SELECT S.*,P.num_posts,P.num_comments from sprinters S LEFT JOIN (SELECT owner,count(*) num_posts, C.num_comments FROM posts P LEFT JOIN (SELECT id_post,count(*) num_comments FROM comments GROUP BY id_post) C on P.id=C.id_post GROUP BY owner) P on S.sprinter=P.owner order by S.sprinter"
         spr = self.conn.cursor()
         spr.execute(sql_sprinters)
         sprinters = spr.fetchall()

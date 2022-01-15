@@ -30,6 +30,8 @@
                 <th>Profile</th>
                 <th>Sprint #</th>
                 <th>Group</th>
+                <th># Posts</th>
+                <th># Comments</th>
                 <th>Open</th>
                 <th>Edit</th>
                 <th>Delete</th>
@@ -44,6 +46,8 @@
                 <td>{{sprinter[2]}}</td>
                 <td>{{sprinter[3]}}</td>
                 <td>{{sprinter[4]}}</td>
+                <td>{{sprinter[7]}}</td>
+                <td>{{sprinter[8]}}</td>
                 <td> {% if sprinter[2] != None %} <a href='{{sprinter[2]}}' target='sprinter'><img src='static/open.png'></a>{% endif %}</td>
                 <td><a href='/edit_sprinter?id_sprinter={{sprinter[0]}}'><img src='static/edit.png'></td>
                 <td><a href='/delete_sprinter?id_sprinter={{sprinter[0]}}'><img src='static/erase.png'></td>
