@@ -22,6 +22,17 @@
     <br><p>
 
     <form name="nueva" method="post" class="form-inline" action="/track">
+        <div class="input-group input-group-sm col-4">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup2">Sprinter:</span>
+            </div>
+            <select name='owner_sel' class="form-control" onchange="submit()" required>
+                <option value='%'>All</option>
+                {% for sp in sprinters %}
+                    <option {% if owner_sel == sp %} selected {% endif %} value="{{sp}}">{{sp}}</option>
+                {% endfor%}
+            </select>
+        </div>
         <div class="input-group input-group-sm col-2">
             <div class="input-group-prepend">
                 <span class="input-group-text" id="inputGroup3">Day:</span>
@@ -34,7 +45,7 @@
             </select>
         </div>
     <label class='alert' name='author' id='author'>{{author}} Track your comments</label>
-    <span class="badge badge-success" id="progress">1/25</span>
+    <span class="badge badge-success" id="progress"></span>
     <br><p>
     <br><p>
     </form>
@@ -44,6 +55,7 @@
         <thead>
             <tr class='bg-success'>
                 <th>No.</th>
+                <th>Day</th>
                 <th>Owner</th>
                 <th>Comments</th>
                 <th>Check</th>
@@ -53,9 +65,10 @@
         {% for link in links %}
             <tr>
                 <td>{{loop.index0+1}}</td>
-                <td> <a target='post' href='{{link[2]}}'>{{link[1]}}</a></td>
-                <td>{{link[3]}}</td>
-                <td><input class='check' type='checkbox' name='id_post' id='{{link[0]}}' value='{{link[0]}}' {% if link[4]|int > 0 %} checked {% endif %}></td>
+                <td>{{link[1]}}</td>
+                <td> <a target='post' href='{{link[3]}}'>{{link[2]}}</a></td>
+                <td>{{link[4]}}</td>
+                <td><input class='check' type='checkbox' name='id_post' id='{{link[0]}}' value='{{link[0]}}' {% if link[5]|int > 0 %} checked {% endif %}></td>
             </tr>
         {% endfor %}
         </tbody>

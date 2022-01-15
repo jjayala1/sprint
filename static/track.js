@@ -5,6 +5,7 @@ $(document).ready(function(){
 
     $('.check' ).on('click', function(){
 
+        progress()
         id = $(this).attr('id');
         day = $("#filter_day").val();
         action  = $(this).is(':checked');
@@ -25,8 +26,11 @@ $(document).ready(function(){
         });
     });
 
-    var checked = $("input:checkbox:checked").length
-    var total = $("input:checkbox").length
-    $("#progress").html(checked + '/' + total)
+    function progress(){
+        var checked = $("input:checkbox:checked").length
+        var total = $("input:checkbox").length
+        $("#progress").html(checked + '/' + total)
+    }
 
+    progress();
 });

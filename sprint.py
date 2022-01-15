@@ -208,9 +208,9 @@ class Sprint():
             sprinters_name.append(s[1])
         return sprinters_name, sprinters
 
-    def get_links(self, day, author, grupo):
+    def get_links(self, day, owner, author, grupo):
 
-        sql_links = f"SELECT P.id,owner,link,sum(tot_comm), sum(auth_comm) from posts P inner join sprinters S on P.owner=S.sprinter left join (select id_post,author, sum(case when author='{author}' then 1 end) as auth_comm, count(*) as tot_comm from comments where message='' group by id_post) C on P.id=C.id_post WHERE S.grupo='{grupo}' and day='{day}' GROUP BY P.id ORDER BY owner"
+        sql_links = f"SELECT P.id,P.day,owner,link,sum(tot_comm), sum(auth_comm) from posts P inner join sprinters S on P.owner=S.sprinter left join (select id_post,author, sum(case when author='{author}' then 1 end) as auth_comm, count(*) as tot_comm from comments where message='' group by id_post) C on P.id=C.id_post WHERE S.grupo='{grupo}' and P.day like '{day}' and P.owner like '{owner}' GROUP BY P.id ORDER BY owner,day"
         print(sql_links)
         lnk = self.conn.cursor()
         lnk.execute(sql_links)

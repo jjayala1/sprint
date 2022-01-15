@@ -125,6 +125,9 @@ def track():
         if 'filter_day' in request.form:
             day = request.form['filter_day']
 
+        if 'owner_sel' in request.form:
+            owner_sel = request.form['owner_sel']
+
         data = request.json
 
         if data:
@@ -133,9 +136,10 @@ def track():
             action = data[2]['action']
             datos.insert_comments2(day, id_post, author, '', action)
 
-    links = datos.get_links(day, author, grupo)
+    links = datos.get_links(day, owner_sel, author, grupo)
+    sprinters = datos.get_sprinters()[0]
 
-    return render_template('track.html', day_sel=day, links=links, author=author)
+    return render_template('track.html', day_sel=day, links=links, sprinters=sprinters, author=author, owner_sel=owner_sel)
 
 
 @app.route('/myposts', methods=['GET','POST'])
