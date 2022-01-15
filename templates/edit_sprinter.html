@@ -26,21 +26,33 @@
         </div>
         <div class="input-group input-group-sm col-8">
             <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup2">Username:</span>
+            </div>
+            <input size=20 type="text" id="username" name="username" placeholder="Username" class="form-control" value='{{datos[1]}}' required>
+        </div>
+        <div class="input-group input-group-sm col-8">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup2">Password:</span>
+            </div>
+            <input size=20 type="password" id="password" name="password" placeholder="Password" class="form-control" value='{{datos[2]}}' required>
+        </div>
+        <div class="input-group input-group-sm col-8">
+            <div class="input-group-prepend">
                 <span class="input-group-text" id="inputGroup2">Name:</span>
             </div>
-            <input size=20 type="text" id="sprinter" name="sprinter" placeholder="Name" class="form-control" value='{{datos[1]}}' required>
+            <input size=20 type="text" id="sprinter" name="sprinter" placeholder="Name" class="form-control" value='{{datos[3]}}' required>
         </div>
         <div class="input-group input-group-sm col-8">
             <div class="input-group-prepend">
                 <span class="input-group-text" id="inputGroup2">Profile:</span>
             </div>
-            <input type="url" id="profile" name="profile" placeholder="Profile" class="form-control" value='{{datos[2]}}' required>
+            <input type="url" id="profile" name="profile" placeholder="Profile" class="form-control" value='{{datos[4]}}' required>
         </div>
         <div class="input-group input-group-sm col-8">
             <div class="input-group-prepend">
                 <span class="input-group-text" id="inputGroup2">Sprint:</span>
             </div>
-            <input type="number" id="sprint_number" name="sprint_number" placeholder="This is my sprint number..." class="form-control" value='{{datos[3]}}'>
+            <input type="number" id="sprint_number" name="sprint_number" placeholder="This is my sprint number..." class="form-control" value='{{datos[5]}}'>
         </div>
         <div class="input-group input-group-sm col-8">
             <div class="input-group-prepend">
@@ -48,9 +60,9 @@
             </div>
             <select name='group' id='group' class="form-control" required>
                 <option value=''>-Select Group-</option>
-                <option {% if datos[4] == 'A' %} selected {% endif %} value="A">A</option>
-                <option {% if datos[4] == 'B' %} selected {% endif %} value="B">B</option>
-                <option {% if datos[4] == 'C' %} selected {% endif %} value="C">C</option>
+                <option {% if datos[6] == 'A' %} selected {% endif %} value="A">A</option>
+                <option {% if datos[6] == 'B' %} selected {% endif %} value="B">B</option>
+                <option {% if datos[6] == 'C' %} selected {% endif %} value="C">C</option>
             </select>
         </div>
         <div class="input-group input-group-sm col-8">

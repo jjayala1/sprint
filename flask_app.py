@@ -14,10 +14,11 @@ def home():
         return render_template('index.html', mensaje='' )
 
     if request.method == 'POST':
-        modelo = model.Modelo()
+        datos = sprint.Sprint()
+        #modelo = model.Modelo()
         username = request.form['username']
         password = request.form['password']
-        codigo, mensaje, liuser, grupo = modelo.valida_acceso(username, password)
+        codigo, mensaje, liuser, grupo = datos.valida_acceso(username, password)
 
         if codigo == 1:
             session['username'] = username
@@ -40,8 +41,8 @@ def signup():
         liuser = request.form['liuser']
         sprint_number = request.form['sprint_number']
         group = request.form['group']
-        modelo = model.Modelo()
-        codigo, mensaje = modelo.signup(username, password, profile, liuser, sprint_number, group)
+        datos = sprint.Sprint()
+        codigo, mensaje = datos.signup(username, password, profile, liuser, sprint_number, group)
 
         if codigo == 0:
             return render_template('signup.html', mensaje=mensaje )
@@ -224,12 +225,14 @@ def edit_sprinter():
 
     if request.method == 'POST':
         id_sprinter = request.form['id_sprinter']
+        username = request.form['username']
+        password = request.form['password']
         sprinter = request.form['sprinter']
         profile = request.form['profile']
         sprint_number = request.form['sprint_number']
         group = request.form['group']
         datos = sprint.Sprint()
-        datos.edit_sprinter(id_sprinter, sprinter, profile, sprint_number, group)
+        datos.edit_sprinter(id_sprinter, username, password, sprinter, profile, sprint_number, group)
         return redirect(url_for('sprinters'))
 
 @app.route('/delete_sprinter', methods=['GET','POST'])

@@ -26,7 +26,8 @@
             <tr class='bg-success'>
                 <th>#</th>
                 <th>ID</th>
-                <th>Name</th>
+                <th>Username</th>
+                <th>LI Name</th>
                 <th>Profile</th>
                 <th>Sprint #</th>
                 <th>Group</th>
@@ -43,12 +44,13 @@
                 <td>{{loop.index0+1}}</td>
                 <td>{{sprinter[0]}}</td>
                 <td>{{sprinter[1]}}</td>
-                <td>{{sprinter[2]}}</td>
                 <td>{{sprinter[3]}}</td>
                 <td>{{sprinter[4]}}</td>
-                <td>{{sprinter[7]}}</td>
-                <td>{{sprinter[8]}}</td>
-                <td> {% if sprinter[2] != None %} <a href='{{sprinter[2]}}' target='sprinter'><img src='static/open.png'></a>{% endif %}</td>
+                <td>{{sprinter[5]}}</td>
+                <td>{{sprinter[6]}}</td>
+                <td>{{sprinter[9]}}</td>
+                <td>{{sprinter[10]}}</td>
+                <td> {% if sprinter[4] != None %} <a href='{{sprinter[4]}}' target='sprinter'><img src='static/open.png'></a>{% endif %}</td>
                 <td><a href='/edit_sprinter?id_sprinter={{sprinter[0]}}'><img src='static/edit.png'></td>
                 <td><a href='/delete_sprinter?id_sprinter={{sprinter[0]}}'><img src='static/erase.png'></td>
             </tr>

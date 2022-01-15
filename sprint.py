@@ -151,6 +151,36 @@ class Sprint():
         self.conn.execute(table_comments)
         self.conn.execute(table_sprinters)
 
+    def valida_acceso(self, username, password):
+        sql_valida = f"SELECT username, password, sprinter, grupo from sprinters where username='{username}' and password='{password}' order by id DESC"
+        val = self.conn.cursor()
+        val.execute(sql_valida)
+        existe = val.fetchone()
+        mensaje = [0, 'User/password incorrect', '', ''] if existe is None else [1, 'Usuario Válido', existe[2], existe[3]]
+        return mensaje
+
+    def signup(self, username, password, profile, liuser, sprint_number, grupo):
+
+        sql_exists = f"SELECT id from sprinters where username='{username}' order by id DESC"
+        exs = self.conn.cursor()
+        exs.execute(sql_exists)
+        exist = exs.fetchone()
+
+        if exist == None:
+            ins = self.conn.cursor()
+
+            sql_insert = f"INSERT INTO sprinters(username, password, sprinter, profile, sprint_number, grupo) VALUES('{username}', '{password}', '{liuser}', '{profile}', '{sprint_number}', '{grupo}')"
+            ins.execute(sql_insert)
+
+            self.conn.commit()
+            mensaje = [1, f'Usuario {username} Registrado Exitosamente']
+        else:
+            mensaje = [0, f'Usuario {username} ya existe, elige otro.']
+
+        print(mensaje)
+        return mensaje
+
+
     def pivot_table(self, day='%', owner='%'):
 
         sql_sprinters = f"SELECT sprinter from sprinters order by sprinter"
@@ -262,8 +292,8 @@ class Sprint():
         spt.execute(sql_spt)
         return spt.fetchone()
 
-    def edit_sprinter(self, id_sprinter, sprinter, profile, sprint_number, group):
-        sql_edit=f"UPDATE sprinters SET sprinter='{sprinter}', profile='{profile}', sprint_number='{sprint_number}', grupo='{group}' where id={id_sprinter}"
+    def edit_sprinter(self, id_sprinter, username, password, sprinter, profile, sprint_number, group):
+        sql_edit=f"UPDATE sprinters SET username='{username}', password='{password}', sprinter='{sprinter}', profile='{profile}', sprint_number='{sprint_number}', grupo='{group}' where id={id_sprinter}"
         lnk_edt = self.conn.cursor()
         lnk_edt.execute(sql_edit)
         self.conn.commit()
@@ -275,7 +305,7 @@ class Sprint():
         self.conn.commit()
 
     def get_liuser(self, author):
-        sql_liusr = f"SELECT liuser from users where username='{author}'"
+        sql_liusr = f"SELECT liuser from sprinters where username='{author}'"
         print(sql_liusr)
         liu = self.conn.cursor()
         liu.execute(sql_liusr)
