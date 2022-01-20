@@ -6,7 +6,7 @@ class Modelo:
 
     def abre_conexion(self):
         self.ruta = './'
-        #self.ruta = '/home/sprintOct21/sprint'
+        self.ruta = '/home/sprintOct21/sprint'
         self.connection =  sqlite3.connect(f'{self.ruta}/sprint.db', check_same_thread = False)
         self.cursor = self.connection.cursor()
 

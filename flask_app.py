@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, session, redirect, url_for
 import json
 from datetime import date
 import sprint, model
+from slack_sdk import WebClient
+
 
 app = Flask(__name__)
 app.secret_key = "NzFiZjVjNTQzODAwYThkMWVhNGMwZWI0"
@@ -19,6 +21,7 @@ def home():
         username = request.form['username']
         password = request.form['password']
         codigo, mensaje, liuser, grupo = datos.valida_acceso(username, password)
+        print(codigo, mensaje, liuser, grupo)
 
         if codigo == 1:
             session['username'] = username
@@ -116,11 +119,8 @@ def track():
     author = session['author']
     grupo = session['grupo']
 
-    if request.method == 'GET':
-        d1 = date(2022, 1, 9)
-        d2 = date.today()
-        day = (d2 - d1).days
-        owner_sel = '%'
+    day = get_sprint_day()
+    owner_sel = '%'
 
     if request.method == 'POST':
 
@@ -156,9 +156,7 @@ def myposts():
     else:
         owner_sel =  author
 
-    d1 = date(2022, 1, 9)
-    d2 = date.today()
-    day = (d2 - d1).days
+    day = get_sprint_day()
 
     if request.method == 'GET':
         pass
@@ -262,9 +260,188 @@ def chart():
     print('Datos:', dataset)
     print('Likes:', num_likes)
     print('Comments:', num_comments)
-
-
     return render_template('chart.html', dataset=dataset, day_sel=day, owner_sel=owner, sprinters=sprinters, num_likes=num_likes, num_comments=num_comments)
+
+@app.route("/slack", methods=['GET', 'POST'])
+def slack():
+
+    if request.method == 'GET':
+        print("HELLO")
+        data = request.values
+        return f"HELLO {data}"
+
+    if request.method == 'POST':
+        client = WebClient(token=get_slack_token())
+        data = request.json
+        data1 = request.form
+
+        challenge = "ok"
+        if data is not None:
+            if 'challenge' in data:
+                challenge = data['challenge'] 
+
+            if 'event' in data:
+                print(data['event']['user'])
+                reaction = data['event']['reaction']
+                response = client.chat_postMessage(channel='U01NNASMGSV', text=reaction)
+
+        if 'payload' in data1:
+            data2 = json.loads(data1['payload'])
+            print(type(data1))
+            print(type(data2))
+            print(len(data2))
+
+            with open('payload.txt', 'w') as f:
+                for i in data1['payload']:
+                    f.write(i)
+
+            #for k in data2.keys():
+            #    print(k)
+            #print(data2)
+
+            #Block for new post
+            if 'view' in data2:  
+                if 'state' in data2['view']:  
+                    if 'values' in data2['view']['state']:  
+                        if 'combo_day' in data2['view']['state']['values']:  
+                            import modal
+                            print(data2['view']['state']['values']['combo_day']['static_select-action'])
+                            day = data2['view']['state']['values']['combo_day']['static_select-action']['selected_option']['value']
+                            link = data2['view']['state']['values']['link']['plain_text_input-action']['value']
+
+                            if link == '':
+                                view = modal.get_view_new_post_status('link')
+
+                            owner='jjj'
+                            datos = sprint.Sprint()
+                            id_np = datos.new_post(day, link, owner)
+
+                            if id_np:
+                                view = modal.get_view_new_post_status('ok')
+                            else:
+                                view = modal.get_view_new_post_status('error')
+
+                            payload = {"response_action": "push",
+                                       "view": view
+                                      }
+
+                            client = WebClient(token=get_slack_token())
+                            #response = client.views_push(**payload)
+                            return (payload, 200)
+
+            #Block for track comments
+            print(data2['actions'])
+            if 'actions' in data2:  
+                boton = data2['actions'][0]['value']
+                print(data2['actions'])
+
+                if 'action_id' in data2['actions'][0]:
+                    slack_checkbox(data2)
+
+
+
+            #response = client.chat_postMessage(channel='U01NNASMGSV', text=boton)
+
+
+        #with open('payload.txt', 'w') as f:
+        #    for i in data1['payload']:
+        #        f.write(i)
+
+
+        return f"challenge: {challenge}"
+
+def slack_checkbox(data):
+    print('--------------------------------------------------------------------')
+    print('--------------------------------------------------------------------')
+    print(data['user'])
+    print(data['actions'])
+    print(data['user']['username'], data['actions'][0]['action_id'])
+    datos = sprint.Sprint()
+
+    author = data['user']['username']
+    author = 'José de Jesús Juárez Ayala'
+    id_post = data['actions'][0]['action_id'] 
+    day = data['actions'][0]['value']
+    action = True
+
+    datos.insert_comments2(day, id_post, author, '', action)
+
+
+@app.route("/slack_track_posts", methods=['GET', 'POST'])
+def slack_track_posts():
+
+    if request.method == 'POST':
+        import modal
+        data = request.form
+        trigger_id = data['trigger_id']
+
+        datos = sprint.Sprint()
+        day = data['text']
+
+        if day == '':
+            day = get_sprint_day()
+
+        owner_sel = '%'
+        author = 'José de Jesús Juárez Ayala'
+        grupo = 'C'
+        links = datos.get_links(day, owner_sel, author, grupo)
+        
+        #print('--------------------------------------------')
+        #print(data)
+        #print(day, links)
+
+        view = modal.get_view_posts(day, links)
+        payload = {"trigger_id": f"{trigger_id}", 
+                   "view": view
+                  }
+
+        client = WebClient(token=get_slack_token())
+        response = client.views_open(**payload)
+        return ('', 200)
+
+@app.route("/slack_new_post", methods=['GET', 'POST'])
+def slack_new_post():
+
+    if request.method == 'POST':
+        import modal
+
+        datos = sprint.Sprint()
+
+        data = request.form
+        trigger_id = data['trigger_id']
+        link = data['text']
+
+        link = data['text']
+
+        if link == '':
+            view = modal.get_view_new_post()
+
+        else:
+            link = data['text']
+            owner = 'delete'
+            id_np = datos.new_post(day, link, owner)
+
+            if id_np:
+                view = modal.get_view_new_post1('ok')
+            else:
+                view = modal.get_view_new_post1('error')
+
+
+        payload = {"trigger_id": f"{trigger_id}", 
+                   "view": view
+                  }
+
+        client = WebClient(token=get_slack_token())
+        response = client.views_open(**payload)
+        return ('', 200)
+
+def get_sprint_day():
+    d1 = date(2022, 1, 9)
+    d2 = date.today()
+    return (d2 - d1).days
+    
+def get_slack_token():
+    return 'xoxb-1781579884544-2944839523991-W4hg53EfvaVYQKEJa0jLXYTS'
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8002, debug=True)
