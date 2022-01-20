@@ -14,7 +14,7 @@ class Sprint():
         self.file = file
         self.link = link
         self.ruta = './'
-        #self.ruta = '/home/sprintOct21/sprint'
+        self.ruta = '/home/sprintOct21/sprint'
         self.conn = self.create_database(f'{self.ruta}/sprint.db');
         self.create_tables()
         self.data = ''
@@ -107,6 +107,7 @@ class Sprint():
 
         else:
             sql_ins = 'INSERT OR IGNORE INTO comments(id_post, author, message) VALUES(?,?,?);'
+            print(sql_ins)
             cur.execute(sql_ins, (id_post, author, message))
             self.conn.commit()
 
@@ -156,26 +157,26 @@ class Sprint():
         val = self.conn.cursor()
         val.execute(sql_valida)
         existe = val.fetchone()
+        print(sql_valida)
         mensaje = [0, 'User/password incorrect', '', ''] if existe is None else [1, 'Usuario Válido', existe[2], existe[3]]
         return mensaje
 
     def signup(self, username, password, profile, liuser, sprint_number, grupo):
 
-        sql_exists = f"SELECT id from sprinters where username='{username}' order by id DESC"
+        sql_exists = f"SELECT id from sprinters where username='{username}' or sprinter='{liuser}' order by id DESC"
         exs = self.conn.cursor()
         exs.execute(sql_exists)
         exist = exs.fetchone()
 
         if exist == None:
             ins = self.conn.cursor()
-
-            sql_insert = f"INSERT INTO sprinters(username, password, sprinter, profile, sprint_number, grupo) VALUES('{username}', '{password}', '{liuser}', '{profile}', '{sprint_number}', '{grupo}')"
-            ins.execute(sql_insert)
-
+            sql_insert = 'INSERT INTO sprinters(username, password, sprinter, profile, sprint_number, grupo) VALUES(?, ?, ?, ?, ?, ?)'
+            print(sql_ins)
+            ins.execute(sql_insert, (username, password, liuser, profile, sprint_number, grupo))
             self.conn.commit()
-            mensaje = [1, f'Usuario {username} Registrado Exitosamente']
+            mensaje = [1, f'User {username} was registered succesfully!!']
         else:
-            mensaje = [0, f'Usuario {username} ya existe, elige otro.']
+            mensaje = [0, f'User {username} or LinkedIn name {liuser} already exists, choose another one.']
 
         print(mensaje)
         return mensaje
