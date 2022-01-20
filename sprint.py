@@ -229,7 +229,7 @@ class Sprint():
 
     def get_sprinters(self):
 
-        sql_sprinters = f"SELECT S.*,PC.num_posts,PC.num_comments from sprinters S LEFT JOIN (SELECT owner,count(*) num_posts, sum(C.num_comments) num_comments FROM posts P LEFT JOIN (SELECT id_post,count(*) num_comments FROM comments GROUP BY id_post) C on P.id=C.id_post GROUP BY owner) PC on S.sprinter=PC.owner order by S.sprinter"
+        sql_sprinters = f"SELECT S.*,PC.num_posts,PC.num_comments,PC.num_comments_tot,PC.num_likes from sprinters S LEFT JOIN (SELECT owner,count(*) num_posts, sum(C.num_comments) num_comments, sum(num_comments_tot) as num_comments_tot, sum(num_likes) as num_likes FROM posts P LEFT JOIN (SELECT id_post,count(*) num_comments FROM comments GROUP BY id_post) C on P.id=C.id_post GROUP BY owner) PC on S.sprinter=PC.owner order by S.sprinter"
         print(sql_sprinters)
         spr = self.conn.cursor()
         spr.execute(sql_sprinters)
@@ -315,13 +315,13 @@ class Sprint():
 
     def data_likes(self, day='%', owner='%'):
 
-        sql_data = f"SELECT owner, sum(num_likes), sum(num_comments) from posts where day like '{day}' and owner like '{owner}' group by owner order by owner"
+        sql_data = f"SELECT owner, sum(num_likes), sum(num_comments_tot) from posts where day like '{day}' and owner like '{owner}' group by owner order by owner"
 
         if owner != '%':
-            sql_data = f"SELECT day, num_likes, num_comments from posts where day like '{day}' and owner like '{owner}' order by day"
+            sql_data = f"SELECT day, num_likes, num_comments_tot from posts where day like '{day}' and owner like '{owner}' order by day"
 
         if day != '%':
-            sql_data = f"SELECT owner, num_likes, num_comments from posts where day like '{day}' and owner like '{owner}' order by day"
+            sql_data = f"SELECT owner, num_likes, num_comments_tot from posts where day like '{day}' and owner like '{owner}' order by day"
 
         data = self.conn.cursor()
         data.execute(sql_data)
@@ -332,15 +332,15 @@ class Sprint():
             s = [d[0], d[1], d[2]]
             dataset.append(s)
 
-        sql_reactions = f"SELECT sum(num_likes), sum(num_comments) from posts where day like '{day}' and owner like '{owner}'"
+        sql_reactions = f"SELECT sum(num_likes), sum(num_comments_tot) from posts where day like '{day}' and owner like '{owner}'"
         data1 = self.conn.cursor()
         data1.execute(sql_reactions)
 
         for d in data1:
             num_likes = d[0]
-            num_comments = d[1]
+            num_comments_tot = d[1]
 
-        return dataset, num_likes, num_comments
+        return dataset, num_likes, num_comments_tot
 
 
 if __name__ == '__main__':
