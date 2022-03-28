@@ -38,7 +38,7 @@
         </div>
         <div class="input-group input-group-sm col-8">
             <div class="input-group-prepend">
-                <span class="input-group-text" id="inputGroup2">Name:</span>
+                <span class="input-group-text" id="inputGroup2">LI Name:</span>
             </div>
             <input size=20 type="text" id="sprinter" name="sprinter" placeholder="Name" class="form-control" value='{{datos[3]}}' required>
         </div>
@@ -50,9 +50,15 @@
         </div>
         <div class="input-group input-group-sm col-8">
             <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup2">Slack Username:</span>
+            </div>
+            <input size=20 type="text" id="sprinter" name="slack_username" placeholder="Slack Username" class="form-control" value='{{datos[5]}}' required>
+        </div>
+        <div class="input-group input-group-sm col-8">
+            <div class="input-group-prepend">
                 <span class="input-group-text" id="inputGroup2">Sprint:</span>
             </div>
-            <input type="number" id="sprint_number" name="sprint_number" placeholder="This is my sprint number..." class="form-control" value='{{datos[5]}}'>
+            <input type="number" id="sprint_number" name="sprint_number" placeholder="This is my sprint number..." class="form-control" value='{{datos[6]}}'>
         </div>
         <div class="input-group input-group-sm col-8">
             <div class="input-group-prepend">
@@ -60,9 +66,9 @@
             </div>
             <select name='group' id='group' class="form-control" required>
                 <option value=''>-Select Group-</option>
-                <option {% if datos[6] == 'A' %} selected {% endif %} value="A">A</option>
-                <option {% if datos[6] == 'B' %} selected {% endif %} value="B">B</option>
-                <option {% if datos[6] == 'C' %} selected {% endif %} value="C">C</option>
+                <option {% if datos[7] == 'A' %} selected {% endif %} value="A">A</option>
+                <option {% if datos[7] == 'B' %} selected {% endif %} value="B">B</option>
+                <option {% if datos[7] == 'C' %} selected {% endif %} value="C">C</option>
             </select>
         </div>
         <div class="input-group input-group-sm col-8">

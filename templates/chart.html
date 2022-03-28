@@ -1,24 +1,6 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
+{% extends 'control.html' %}
 
-  <title>Dashboard Sprint</title>
-  <meta name="description" content="HTML5 Template">
-  <meta name="author" content="JJJA">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-  <link rel="stylesheet" href="static/style.css?v=1.0">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.js"></script>
-</head>
-
-<body>
-    <h1>LinkedIn Sprint Thomas Kuegler January 2022</h1>
-    <h2>Main Stats</h2>
-    <button class='btn btn-primary' onclick="location.href='/dashboard'">Dashboard</button>
-    <button class='btn btn-primary' onclick="location.href='/track'">Track</button>
-    <button class='btn btn-primary' onclick="location.href='/templates'">Templates</button>
-    <br><p>
-    <br>
+{% block content %}
 
     <form name="nueva" method="post" class="form-inline">
         <div class="input-group input-group-sm col-2">
@@ -55,78 +37,84 @@
     </form>
 
 
+    <div>
+        <canvas id="postsChart" width="600" height="200"></canvas>
+    </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.js"></script>
+    <script src="../static/chart.js"></script>
 
+    <script type="text/javascript">
+        let dataset = myFunc({{dataset|tojson}})
+        graph(dataset)
+    </script>
 
-<div>
-    <canvas id="postsChart" width="600" height="200"></canvas>
-</div>
 
 
 <script>
 
-    function myFunc(vars) {
+    function myFunc1(vars) {
         return vars
     }
 
-    let dataset = myFunc({{dataset|tojson}})
+    function graph1(){
 
-    let labels = [];
-    let likes = [];
-    let comments = [];
+        let labels = [];
+        let likes = [];
+        let comments = [];
 
-    for(d of dataset){
-        labels.push(d[0]);
-        likes.push(d[1]);
-        comments.push(d[2]);
+        for(d of dataset){
+            labels.push(d[0]);
+            likes.push(d[1]);
+            comments.push(d[2]);
+        }
+
+
+
+        new Chart(document.getElementById("postsChart"), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: "Likes",
+                        backgroundColor: ["#0e6e02"],
+                        data: likes
+                    },
+                    {
+                        label: "Comments",
+                        backgroundColor: ["#045850"],
+                        data: comments
+                    },
+
+                ]
+            },
+            options: {
+                legend: { display: true },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Sprint'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Day/Sprinter'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: ''
+                        }
+                    }
+                },
+            }
+        });
     }
 
-
-
-    new Chart(document.getElementById("postsChart"), {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: "Likes",
-                    backgroundColor: ["#0e6e02"],
-                    data: likes
-                },
-                {
-                    label: "Comments",
-                    backgroundColor: ["#045850"],
-                    data: comments
-                },
-
-            ]
-        },
-        options: {
-            legend: { display: true },
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Sprint'
-                }
-            },
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Day/Sprinter'
-                    }
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: ''
-                    }
-                }
-            },
-        }
-    });
-
-
-
-
 </script>
+
+{% endblock %}

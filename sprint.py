@@ -99,6 +99,8 @@ class Sprint():
         cur = self.conn.cursor()
         print(action)
 
+        author = self.convert_slack_to_linkedin(author)
+
         if action == False:
             sql_del = f"DELETE FROM comments WHERE id_post='{id_post}' and author='{author}' and message=''"
             print(sql_del)
@@ -161,7 +163,7 @@ class Sprint():
         mensaje = [0, 'User/password incorrect', '', ''] if existe is None else [1, 'Usuario Válido', existe[2], existe[3]]
         return mensaje
 
-    def signup(self, username, password, profile, liuser, sprint_number, grupo):
+    def signup(self, username, password, liuser, profile, slack_username, sprint_number, grupo):
 
         sql_exists = f"SELECT id from sprinters where username='{username}' or sprinter='{liuser}' order by id DESC"
         exs = self.conn.cursor()
@@ -170,9 +172,9 @@ class Sprint():
 
         if exist == None:
             ins = self.conn.cursor()
-            sql_insert = 'INSERT INTO sprinters(username, password, sprinter, profile, sprint_number, grupo) VALUES(?, ?, ?, ?, ?, ?)'
-            print(sql_ins)
-            ins.execute(sql_insert, (username, password, liuser, profile, sprint_number, grupo))
+            sql_insert = 'INSERT INTO sprinters(username, password, sprinter, profile, slack_username, sprint_number, grupo) VALUES(?, ?, ?, ?, ?, ?, ?)'
+            print(sql_insert)
+            ins.execute(sql_insert, (username, password, liuser, profile, slack_username, sprint_number, grupo))
             self.conn.commit()
             mensaje = [1, f'User {username} was registered succesfully!!']
         else:
@@ -217,6 +219,8 @@ class Sprint():
         x = datetime.datetime.now()
         curtime = x.strftime("%Y-%m-%d %X")
 
+        owner = self.convert_slack_to_linkedin(owner)
+
         sql = 'REPLACE INTO posts(day, link, owner, start_date) VALUES(?, ?, ?, ?);'
         print(sql,day, link, owner, curtime)
         cur = self.conn.cursor()
@@ -227,9 +231,16 @@ class Sprint():
         #self.main()
         return cur.lastrowid
 
+    def convert_slack_to_linkedin(self, owner):
+        cur = self.conn.cursor()
+        sql_owner = f"SELECT sprinter from sprinters where sprinter='{owner}' or slack_username='{owner}'"
+        print(sql_owner)
+        cur.execute(sql_owner)
+        return cur.fetchone()[0]
+
     def get_sprinters(self):
 
-        sql_sprinters = f"SELECT S.*,PC.num_posts,PC.num_comments,PC.num_comments_tot,PC.num_likes from sprinters S LEFT JOIN (SELECT owner,count(*) num_posts, sum(C.num_comments) num_comments, sum(num_comments_tot) as num_comments_tot, sum(num_likes) as num_likes FROM posts P LEFT JOIN (SELECT id_post,count(*) num_comments FROM comments GROUP BY id_post) C on P.id=C.id_post GROUP BY owner) PC on S.sprinter=PC.owner order by S.sprinter"
+        sql_sprinters = f"SELECT S.*,PC.num_posts,PC.num_comments,PC.num_comments_tot,PC.num_likes from sprinters S LEFT JOIN (SELECT owner,count(*) num_posts, sum(C.num_comments) num_comments, sum(P.num_comments) as num_comments_tot, sum(num_likes) as num_likes FROM posts P LEFT JOIN (SELECT id_post,count(*) num_comments FROM comments GROUP BY id_post) C on P.id=C.id_post GROUP BY owner) PC on S.sprinter=PC.owner order by S.sprinter"
         print(sql_sprinters)
         spr = self.conn.cursor()
         spr.execute(sql_sprinters)
@@ -251,7 +262,7 @@ class Sprint():
 
     def get_myposts(self, author):
 
-        sql_links = f"SELECT P.id, day, owner, link, start_date, num_views, num_likes, num_comments, count(id_post) from posts P inner join sprinters S on P.owner=S.sprinter left join (select * from comments where message='') C on P.id=C.id_post WHERE P.owner='{author}' group by P.id,owner,link ORDER BY day"
+        sql_links = f"SELECT P.id, day, owner, link, start_date, num_views, num_likes, num_comments, count(id_post) as spr_comments from posts P inner join sprinters S on P.owner=S.sprinter left join (select * from comments where message='') C on P.id=C.id_post WHERE P.owner='{author}' group by P.id,owner,link ORDER BY day"
         print(sql_links)
         lnk = self.conn.cursor()
         lnk.execute(sql_links)
@@ -270,7 +281,9 @@ class Sprint():
         return pst.fetchone()
 
     def edit_post(self, id_post, link, num_views, num_likes, num_comments, owner):
-        sql_edit=f"UPDATE posts SET owner='{owner}', link='{link}', num_views='{num_views}', num_likes='{num_likes}', num_comments='{num_comments}' where id={id_post}"
+        x = datetime.datetime.now()
+        curtime = x.strftime("%Y-%m-%d %X")
+        sql_edit=f"UPDATE posts SET owner='{owner}', link='{link}', num_views='{num_views}', num_likes='{num_likes}', num_comments='{num_comments}', update_date='{curtime}' where id={id_post}"
         print(sql_edit)
         lnk_edt = self.conn.cursor()
         lnk_edt.execute(sql_edit)
@@ -293,8 +306,8 @@ class Sprint():
         spt.execute(sql_spt)
         return spt.fetchone()
 
-    def edit_sprinter(self, id_sprinter, username, password, sprinter, profile, sprint_number, group):
-        sql_edit=f"UPDATE sprinters SET username='{username}', password='{password}', sprinter='{sprinter}', profile='{profile}', sprint_number='{sprint_number}', grupo='{group}' where id={id_sprinter}"
+    def edit_sprinter(self, id_sprinter, username, password, sprinter, profile, slack_username, sprint_number, group):
+        sql_edit=f"UPDATE sprinters SET username='{username}', password='{password}', sprinter='{sprinter}', profile='{profile}', slack_username='{slack_username}', sprint_number='{sprint_number}', grupo='{group}' where id={id_sprinter}"
         lnk_edt = self.conn.cursor()
         lnk_edt.execute(sql_edit)
         self.conn.commit()
@@ -315,13 +328,13 @@ class Sprint():
 
     def data_likes(self, day='%', owner='%'):
 
-        sql_data = f"SELECT owner, sum(num_likes), sum(num_comments_tot) from posts where day like '{day}' and owner like '{owner}' group by owner order by owner"
+        sql_data = f"SELECT owner, sum(num_likes), sum(num_comments) from posts where day like '{day}' and owner like '{owner}' group by owner order by owner"
 
         if owner != '%':
-            sql_data = f"SELECT day, num_likes, num_comments_tot from posts where day like '{day}' and owner like '{owner}' order by day"
+            sql_data = f"SELECT day, num_likes, num_comments from posts where day like '{day}' and owner like '{owner}' order by day"
 
         if day != '%':
-            sql_data = f"SELECT owner, num_likes, num_comments_tot from posts where day like '{day}' and owner like '{owner}' order by day"
+            sql_data = f"SELECT owner, num_likes, num_comments from posts where day like '{day}' and owner like '{owner}' order by day"
 
         data = self.conn.cursor()
         data.execute(sql_data)
@@ -332,15 +345,15 @@ class Sprint():
             s = [d[0], d[1], d[2]]
             dataset.append(s)
 
-        sql_reactions = f"SELECT sum(num_likes), sum(num_comments_tot) from posts where day like '{day}' and owner like '{owner}'"
+        sql_reactions = f"SELECT sum(num_likes), sum(num_comments) from posts where day like '{day}' and owner like '{owner}'"
         data1 = self.conn.cursor()
         data1.execute(sql_reactions)
 
         for d in data1:
             num_likes = d[0]
-            num_comments_tot = d[1]
+            num_comments = d[1]
 
-        return dataset, num_likes, num_comments_tot
+        return dataset, num_likes, num_comments
 
 
 if __name__ == '__main__':
