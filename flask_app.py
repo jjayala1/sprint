@@ -37,7 +37,10 @@ def signup():
     if request.method == 'GET':
         return render_template('signup.html')
 
+    print(request.method,request.form['accion'])
+
     if request.method == 'POST' and request.form['accion'] == 'signup':
+        print(request.method,request.form['accion'])
         username = request.form['username']
         password = request.form['password']
         profile = request.form['profile']
@@ -183,7 +186,9 @@ def edit_post():
 
     if request.method == 'POST':
         #and request.form['accion'] == 'edit':
-        print(request.form['accion'])
+        print(request.form['accion'],request.form['id_post'],request.form['link'])
+        print(request.form['num_views'],request.form['num_likes'],request.form['num_comments'])
+        print(request.form['owner_sel'])
         id_post = request.form['id_post']
         link = request.form['link']
         num_views = request.form['num_views']
@@ -191,6 +196,7 @@ def edit_post():
         num_comments = request.form['num_comments']
         owner = request.form['owner_sel']
         datos = sprint.Sprint()
+        print(request.form['link'])
         datos.edit_post(id_post, link, num_views, num_likes, num_comments, owner)
         return redirect(url_for('myposts'))
 

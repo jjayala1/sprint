@@ -171,7 +171,7 @@ class Sprint():
         if exist == None:
             ins = self.conn.cursor()
             sql_insert = 'INSERT INTO sprinters(username, password, sprinter, profile, sprint_number, grupo) VALUES(?, ?, ?, ?, ?, ?)'
-            print(sql_ins)
+            print(sql_insert)
             ins.execute(sql_insert, (username, password, liuser, profile, sprint_number, grupo))
             self.conn.commit()
             mensaje = [1, f'User {username} was registered succesfully!!']
@@ -216,15 +216,33 @@ class Sprint():
 
         x = datetime.datetime.now()
         curtime = x.strftime("%Y-%m-%d %X")
-
-        sql = 'REPLACE INTO posts(day, link, owner, start_date) VALUES(?, ?, ?, ?);'
-        print(sql,day, link, owner, curtime)
-        cur = self.conn.cursor()
-        cur.execute(sql, (day, link, owner, curtime))
-        self.conn.commit()
         self.day = day
         self.link = link
-        #self.main()
+
+        link2 = link.replace('activity:', 'activity-')
+        activity=link2[link2.find('activity'):].split('-')[1]
+        activity = activity.replace('/', '')
+
+        if activity == '':
+            return 'link not valid'
+
+        sql_exist = f"SELECT id from posts where link like '%{activity}%'"
+        cur = self.conn.cursor()
+        cur.execute(sql_exist)
+        exists = cur.fetchone() 
+
+        if exists:
+            sql = f"UPDATE posts set day=?, owner=?, start_date=? where link like '%{activity}%'"
+            cur.execute(sql, (day, owner, curtime, activity))
+
+        else:
+            sql = 'INSERT INTO posts(day, link, owner, start_date) VALUES(?, ?, ?, ?)'
+            cur.execute(sql, (day, link, owner, curtime))
+
+        print('-------------------------------------------------')
+        print(sql, day, link, owner, curtime)
+        print('-------------------------------------------------')
+        self.conn.commit()
         return cur.lastrowid
 
     def get_sprinters(self):
@@ -270,8 +288,24 @@ class Sprint():
         return pst.fetchone()
 
     def edit_post(self, id_post, link, num_views, num_likes, num_comments, owner):
-        sql_edit=f"UPDATE posts SET owner='{owner}', link='{link}', num_views='{num_views}', num_likes='{num_likes}', num_comments='{num_comments}' where id={id_post}"
+
+        link2 = link.replace('activity:', 'activity-')
+        activity=link2[link2.find('activity'):].split('-')[1]
+        activity = activity.replace('/', '')
+
+        if activity == '':
+            return 'link not valid'
+
+        if int(id_post) == 0:
+            sql_edit = f"UPDATE posts SET num_likes='{num_likes}', num_comments='{num_comments}' where link like '%{activity}%'"
+        else:            
+            sql_edit = f"UPDATE posts SET owner='{owner}', link='{link}', num_views='{num_views}', num_likes='{num_likes}', num_comments='{num_comments}' where id={id_post} or link='{link}'"
+
+        print('-------------------------------------------------')
+        print(id_post, link, num_views, num_likes, num_comments, owner,"\n")
         print(sql_edit)
+        print('-------------------------------------------------')
+
         lnk_edt = self.conn.cursor()
         lnk_edt.execute(sql_edit)
         self.conn.commit()
@@ -315,13 +349,13 @@ class Sprint():
 
     def data_likes(self, day='%', owner='%'):
 
-        sql_data = f"SELECT owner, sum(num_likes), sum(num_comments_tot) from posts where day like '{day}' and owner like '{owner}' group by owner order by owner"
+        sql_data = f"SELECT owner, sum(num_likes), sum(num_comments) from posts where day like '{day}' and owner like '{owner}' group by owner order by owner"
 
         if owner != '%':
-            sql_data = f"SELECT day, num_likes, num_comments_tot from posts where day like '{day}' and owner like '{owner}' order by day"
+            sql_data = f"SELECT day, num_likes, num_comments from posts where day like '{day}' and owner like '{owner}' order by day"
 
         if day != '%':
-            sql_data = f"SELECT owner, num_likes, num_comments_tot from posts where day like '{day}' and owner like '{owner}' order by day"
+            sql_data = f"SELECT owner, num_likes, num_comments from posts where day like '{day}' and owner like '{owner}' order by day"
 
         data = self.conn.cursor()
         data.execute(sql_data)
@@ -332,15 +366,15 @@ class Sprint():
             s = [d[0], d[1], d[2]]
             dataset.append(s)
 
-        sql_reactions = f"SELECT sum(num_likes), sum(num_comments_tot) from posts where day like '{day}' and owner like '{owner}'"
+        sql_reactions = f"SELECT sum(num_likes), sum(num_comments) from posts where day like '{day}' and owner like '{owner}'"
         data1 = self.conn.cursor()
         data1.execute(sql_reactions)
 
         for d in data1:
             num_likes = d[0]
-            num_comments_tot = d[1]
+            num_comments = d[1]
 
-        return dataset, num_likes, num_comments_tot
+        return dataset, num_likes, num_comments
 
 
 if __name__ == '__main__':

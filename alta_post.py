@@ -16,7 +16,4 @@ for index, row in df.iterrows():
     owner = row['FULL NAME'].strip()
 
     data=f"day_number={day}&new_link={link}&fauthor={owner}"
-    print(data)
     r = requests.post("http://sprintoct21.pythonanywhere.com/new_post", data=data, headers={"Content-Type": "application/x-www-form-urlencoded"})
-    print(r.text)
-    exit()
