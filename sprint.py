@@ -424,7 +424,7 @@ if __name__ == '__main__':
     def get_posts_sh():
         cur_day = (date.today() - date(2022, 3, 14)).days
         sprint = Sprint()
-    
+ 
         for d in range(cur_day-6, cur_day+1):
             posts = sprint.get_posts_curl(d, '%')
             for p in posts:
@@ -460,7 +460,7 @@ if __name__ == '__main__':
                 origin = file_post.name
                 dest = file_post.name + '.proc'
                 num_day = file_post.name[-7:-5]
-    
+
                 sprint = Sprint(num_day, f'{origin}', '')
                 sprint.main()
                 #print(sprint.pivot_table())
