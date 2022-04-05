@@ -245,7 +245,7 @@ class Sprint():
         sql_exist = f"SELECT id from posts where link like '%{activity}%'"
         cur = self.conn.cursor()
         cur.execute(sql_exist)
-        exists = cur.fetchone() 
+        exists = cur.fetchone()
 
         if exists:
             sql = f"UPDATE posts set day=?, link=?, owner=? where link like '%{activity}%'"
@@ -322,7 +322,7 @@ class Sprint():
             return 'link not valid'
         if int(id_post) == 0:
             sql_edit = f"UPDATE posts SET num_likes='{num_likes}', num_comments='{num_comments}' where link like '%{activity}%'"
-        else:            
+        else:
             sql_edit = f"UPDATE posts SET owner='{owner}', link='{link}', num_views='{num_views}', num_likes='{num_likes}', num_comments='{num_comments}' where id={id_post} or link='{link}'"
 
         print('-------------------------------------------------')
@@ -405,54 +405,65 @@ class Sprint():
 
 if __name__ == '__main__':
 
-    cur_day = (date.today() - date(2022, 3, 14)).days
+    #archivo_links = './posts/links_Gonzalo.txt1'
+    #d = 1
 
-    sprint = Sprint()
+    #try:
+    #    links = open(archivo_links)
+    #    for l in links.readlines():
+    #        sprint = Sprint(d,'',l)
+    #        sprint.file_name = archivo_links.split('_')[1][:-4] + '_' + str(d).zfill(2) + '.html'
+    #        #print(sprint.file_name)
+    #        #print(l)
+    #        sprint.main()
+    #        d += 1
+    #    exit()
+    #except:
+    #    print(f'Archivo {archivo_links} no existe')
+
+    def get_posts_sh():
+        cur_day = (date.today() - date(2022, 3, 14)).days
+        sprint = Sprint()
     
-    for d in range(cur_day-6, cur_day+1):
-        posts = sprint.get_posts_curl(d, '%')
-        for p in posts:
-            command = p[0]
-            sprint.execute_curl(command)
-
-    exit()
-
-
-    archivo_links = './posts/links_Gonzalo.txt1'
-    d = 1
-
-    try:
-        links = open(archivo_links)
-        for l in links.readlines():
-            sprint = Sprint(d,'',l)
-            sprint.file_name = archivo_links.split('_')[1][:-4] + '_' + str(d).zfill(2) + '.html'
-            #print(sprint.file_name)
-            #print(l)
-            sprint.main()
-            d += 1
+        for d in range(cur_day-6, cur_day+1):
+            posts = sprint.get_posts_curl(d, '%')
+            for p in posts:
+                command = p[0]
+                sprint.execute_curl(command)
         exit()
-    except:
-        print(f'Archivo {archivo_links} no existe')
+
+    user = 'stanfield'
+    user = 'l'
+    for file_post in os.scandir("./posts/"):
+        if file_post.name[-4:] == 'html' and user in file_post.name:
+            day = file_post.name[3:5]
+            print(day,file_post.name)
+            size = os.path.getsize(f"./posts/{file_post.name}")
+
+            if size > 5000:
+                sprint = Sprint(day, f'{file_post.name}', '')
+                sprint.main()
+
+    def rename_to_html():
+        for file_post in os.scandir("./posts"):
+            if file_post.name[-4:] == 'proc':
+                print(file_post.name)
+                origin = file_post.name
+                dest = file_post.name[:-5]
+                os.rename(f'./posts/{origin}', f'./posts/{dest}')
 
 
-    for file_post in os.scandir("./posts"):
-        if file_post.name[-4:] == 'proc':
-            print(file_post.name)
-            origin = file_post.name
-            dest = file_post.name[:-5]
-            os.rename(f'./posts/{origin}', f'./posts/{dest}')
-
-
-    for file_post in os.scandir("./posts"):
-        if file_post.name[-4:] == 'html':
-            print(file_post.name)
-            origin = file_post.name
-            dest = file_post.name + '.proc'
-            num_day = file_post.name[-7:-5]
-
-            sprint = Sprint(num_day, f'{origin}', '')
-            sprint.main()
-            #print(sprint.pivot_table())
-            os.rename(f'./posts/{origin}', f'./posts/{dest}')
+    def rename_to_proc():
+        for file_post in os.scandir("./posts"):
+            if file_post.name[-4:] == 'html':
+                print(file_post.name)
+                origin = file_post.name
+                dest = file_post.name + '.proc'
+                num_day = file_post.name[-7:-5]
+    
+                sprint = Sprint(num_day, f'{origin}', '')
+                sprint.main()
+                #print(sprint.pivot_table())
+                os.rename(f'./posts/{origin}', f'./posts/{dest}')
 
 
