@@ -3,7 +3,9 @@ import requests
 from bs4 import BeautifulSoup
 import sqlite3
 from sqlite3 import Error
-import datetime
+from datetime import date, datetime
+from html import unescape
+import subprocess
 
 
 class Sprint():
@@ -14,11 +16,14 @@ class Sprint():
         self.file = file
         self.link = link
         self.ruta = './'
-        self.ruta = '/home/sprintOct21/sprint'
-        self.conn = self.create_database(f'{self.ruta}/sprint.db');
-        self.create_tables()
+        self.ruta = path.dirname(__file__) if "__file__" in locals() else os.getcwd()
+        #self.conn = self.create_database(f'{self.ruta}/sprint.db');
+        #self.create_tables()
         self.data = ''
         self.file_name = 'file.txt'
+        self.num_likes = 0
+        self.num_comments = 0
+
 
     def main(self):
 
@@ -35,7 +40,7 @@ class Sprint():
     def get_page(self):
         l = self.link.strip()
         proxyDict = { "http": "socks5h://localhost:3128", "https": "socks5h://localhost:3128", }
-        page = requests.get(l, proxies=proxyDict)
+        page = requests.get(l)
         print(l, self.file_name)
 
         with open(f'{self.ruta}/posts/{self.file_name}', 'bw') as file:
@@ -49,20 +54,31 @@ class Sprint():
         self.link = self.data.splitlines()[0]
 
     def get_likes(self):
-        self.link = self.soup.find("meta", property="og:url")["content"]
-        self.owner = self.soup.find('a', class_ = 'share-update-card__actor-text-link').text.strip()
-        self.num_likes = self.soup.find('span', class_ = 'social-counts-reactions__social-counts-numRections').text.strip()
-        #num_comments = self.soup.find_all('a', { 'class':'social-action-counts__social-counts-item'})
-        self.num_comments = self.soup.select('a[class="social-action-counts__social-counts-item"]')[0].text.strip().split()[0]
-        print(self.link, self.num_likes, self.num_comments)
-        self.id_post = self.insert_tarea()
+        try:
+            self.link = self.soup.find("meta", property="og:url")["content"]
+            self.owner = self.soup.find('a', class_ = 'share-update-card__actor-text-link').text.strip()
+            self.num_likes = self.soup.find('span', class_ = 'social-counts-reactions__social-counts-numRections').text.strip()
+            #num_comments = self.soup.find_all('a', { 'class':'social-action-counts__social-counts-item'})
+            self.num_comments = self.soup.select('a[class="social-action-counts__social-counts-item"]')[0].text.strip().split()[0]
+            print(self.link, self.num_likes, self.num_comments)
+            self.id_post = self.insert_tarea()
+        except:
+            print('Error')
 
         #likes = [r.text.strip() for r in num_likes]
         #comms = [r.text.strip() for r in num_comments]
         #links = [r.attrs['href'] for r in num_comments]
 
+    def insert_tarea_api(self):
+
+        data=f"accion=edit&id_post=0&link={self.link}&num_views=&num_likes={self.num_likes}&num_comments={self.num_comments}&owner_sel="
+        data = unescape(data)
+        print(data)
+        r = requests.post("http://sprintoct21.pythonanywhere.com/edit_post", data=data, headers={"Content-Type": "application/x-www-form-urlencoded"})
+        return True
+
     def insert_tarea(self):
-        x = datetime.datetime.now()
+        x = datetime.now()
         curtime = x.strftime("%Y-%m-%d %X")
 
         sql = 'REPLACE INTO posts (day, owner, link, start_date, update_date, num_comments, num_likes) VALUES(?,?,?,?,?,?,?);'
@@ -214,7 +230,7 @@ class Sprint():
 
     def new_post(self, day, link, owner):
 
-        x = datetime.datetime.now()
+        x = datetime.now()
         curtime = x.strftime("%Y-%m-%d %X")
         self.day = day
         self.link = link
@@ -232,9 +248,8 @@ class Sprint():
         exists = cur.fetchone() 
 
         if exists:
-            sql = f"UPDATE posts set day=?, owner=?, start_date=? where link like '%{activity}%'"
-            cur.execute(sql, (day, owner, curtime, activity))
-
+            sql = f"UPDATE posts set day=?, link=?, owner=? where link like '%{activity}%'"
+            cur.execute(sql, (day, link, owner))
         else:
             sql = 'INSERT INTO posts(day, link, owner, start_date) VALUES(?, ?, ?, ?)'
             cur.execute(sql, (day, link, owner, curtime))
@@ -247,8 +262,8 @@ class Sprint():
 
     def get_sprinters(self):
 
-        sql_sprinters = f"SELECT S.*,PC.num_posts,PC.num_comments,PC.num_comments_tot,PC.num_likes from sprinters S LEFT JOIN (SELECT owner,count(*) num_posts, sum(C.num_comments) num_comments, sum(num_comments_tot) as num_comments_tot, sum(num_likes) as num_likes FROM posts P LEFT JOIN (SELECT id_post,count(*) num_comments FROM comments GROUP BY id_post) C on P.id=C.id_post GROUP BY owner) PC on S.sprinter=PC.owner order by S.sprinter"
-        print(sql_sprinters)
+        sql_sprinters = f"SELECT S.*,PC.num_posts,PC.num_comments_sprinters,PC.num_comments,PC.num_likes from sprinters S LEFT JOIN (SELECT owner,count(*) num_posts, sum(C.num_comments_sprinters) num_comments_sprinters, sum(P.num_comments) as num_comments, sum(num_likes) as num_likes FROM posts P LEFT JOIN (SELECT id_post,count(*) num_comments_sprinters FROM comments GROUP BY id_post) C on P.id=C.id_post GROUP BY owner) PC on S.sprinter=PC.owner order by S.sprinter"
+        print("Sprinters: " + sql_sprinters)
         spr = self.conn.cursor()
         spr.execute(sql_sprinters)
         sprinters = spr.fetchall()
@@ -260,27 +275,38 @@ class Sprint():
 
     def get_links(self, day, owner, author, grupo):
 
-        sql_links = f"SELECT P.id,P.day,owner,link,sum(tot_comm), sum(auth_comm) from posts P inner join sprinters S on P.owner=S.sprinter left join (select id_post,author, sum(case when author='{author}' then 1 end) as auth_comm, count(*) as tot_comm from comments where message='' group by id_post) C on P.id=C.id_post WHERE S.grupo='{grupo}' and P.day like '{day}' and P.owner like '{owner}' GROUP BY P.id ORDER BY owner,day"
+        sql_links = f"SELECT P.id, P.day, owner, link, sum(tot_comm), sum(auth_comm) from posts P inner join sprinters S on P.owner=S.sprinter left join (select id_post,author, sum(case when author='{author}' then 1 end) as auth_comm, count(*) as tot_comm from comments where message='' group by id_post) C on P.id=C.id_post WHERE S.grupo='{grupo}' and P.day like '{day}' and P.owner like '{owner}' GROUP BY P.id ORDER BY owner,day"
         print(sql_links)
         lnk = self.conn.cursor()
         lnk.execute(sql_links)
         links = lnk.fetchall()
         return links
 
-    def get_myposts(self, author):
+    def get_myposts(self, day, owner, author, grupo ):
 
-        sql_links = f"SELECT P.id, day, owner, link, start_date, num_views, num_likes, num_comments, count(id_post) from posts P inner join sprinters S on P.owner=S.sprinter left join (select * from comments where message='') C on P.id=C.id_post WHERE P.owner='{author}' group by P.id,owner,link ORDER BY day"
+        sql_links = f"SELECT P.id, P.day, owner, link, sum(tot_comm), sum(auth_comm), start_date, num_views, num_likes, num_comments, count(id_post) from posts P inner join sprinters S on P.owner=S.sprinter left join (select id_post,author, sum(case when author='{author}' then 1 end) as auth_comm, count(*) as tot_comm from comments where message='' group by id_post) C on P.id=C.id_post WHERE S.grupo='{grupo}' and P.day like '{day}' and P.owner like '{owner}' GROUP BY P.id ORDER BY owner,day"
+        #sql_links = f"SELECT P.id, day, owner, link, start_date, num_views, num_likes, num_comments, count(id_post) from posts P inner join sprinters S on P.owner=S.sprinter left join (select * from comments where message='') C on P.id=C.id_post WHERE P.owner like '{author}' group by P.id,owner,link ORDER BY day"
         print(sql_links)
         lnk = self.conn.cursor()
         lnk.execute(sql_links)
         links = lnk.fetchall()
         return links
+
+    def get_posts_curl(self, day=1, sprinter=''):
+        sql_curl = f"select 'curl ' || link || ' > posts/day' || substr('0' || day,-2) || '_' || username || '.html' from posts inner join sprinters on sprinter=owner where day='{day}' and sprinter like '{sprinter}'"
+        curl = self.conn.cursor()
+        curl.execute(sql_curl)
+        return curl.fetchall()
+
+    def execute_curl(self, link):
+        print(link)
+        subprocess.run([link], shell=True)
+
 
 #######################################################################################################################
 ##########################################ABC POST#################################################################
 #######################################################################################################################
     def get_post(self, id_post):
-
         sql_post = f"SELECT id, owner, link, num_views, num_likes, num_comments from posts where id={id_post}"
         print(sql_post)
         pst = self.conn.cursor()
@@ -288,14 +314,12 @@ class Sprint():
         return pst.fetchone()
 
     def edit_post(self, id_post, link, num_views, num_likes, num_comments, owner):
-
         link2 = link.replace('activity:', 'activity-')
         activity=link2[link2.find('activity'):].split('-')[1]
         activity = activity.replace('/', '')
 
         if activity == '':
             return 'link not valid'
-
         if int(id_post) == 0:
             sql_edit = f"UPDATE posts SET num_likes='{num_likes}', num_comments='{num_comments}' where link like '%{activity}%'"
         else:            
@@ -317,6 +341,7 @@ class Sprint():
         lnk_del.execute(sql_delete)
         self.conn.commit()
 
+
 #######################################################################################################################
 ##########################################ABC SPRINTER#################################################################
 #######################################################################################################################
@@ -329,6 +354,7 @@ class Sprint():
 
     def edit_sprinter(self, id_sprinter, username, password, sprinter, profile, sprint_number, group):
         sql_edit=f"UPDATE sprinters SET username='{username}', password='{password}', sprinter='{sprinter}', profile='{profile}', sprint_number='{sprint_number}', grupo='{group}' where id={id_sprinter}"
+        print(sql_edit)
         lnk_edt = self.conn.cursor()
         lnk_edt.execute(sql_edit)
         self.conn.commit()
@@ -379,6 +405,19 @@ class Sprint():
 
 if __name__ == '__main__':
 
+    cur_day = (date.today() - date(2022, 3, 14)).days
+
+    sprint = Sprint()
+    
+    for d in range(cur_day-6, cur_day+1):
+        posts = sprint.get_posts_curl(d, '%')
+        for p in posts:
+            command = p[0]
+            sprint.execute_curl(command)
+
+    exit()
+
+
     archivo_links = './posts/links_Gonzalo.txt1'
     d = 1
 
@@ -394,7 +433,6 @@ if __name__ == '__main__':
         exit()
     except:
         print(f'Archivo {archivo_links} no existe')
-
 
 
     for file_post in os.scandir("./posts"):

@@ -1,25 +1,6 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
+{% extends 'control.html' %}
 
-  <title>Dashboard Sprint</title>
-  <meta name="description" content="HTML5 Template">
-  <meta name="author" content="JJJA">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-  <link rel="stylesheet" href="static/style.css?v=1.0">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src='static/track.js'></script>
-</head>
-
-<body>
-    <h1>LinkedIn Sprint Thomas Kuegler January 2022</h1>
-    <button class='btn btn-primary' onclick="location.href='/dashboard'">Dashboard</button>
-    <button class='btn btn-primary' onclick="location.href='/stats'">Stats</button>
-    <button class='btn btn-primary' onclick="location.href='/track'">Track</button>
-    <button class='btn btn-primary' onclick="location.href='/myposts'">My Posts</button>
-    <button class='btn btn-primary' onclick="location.href='/templates'">Templates</button>
-    <br><p>
+{% block content %}
 
     <table class='table table-bordered table-striped table-hover table-sm table-responsive table-dark'>
         <thead>
@@ -50,19 +31,23 @@
                 <td>{{sprinter[4]}}</td>
                 <td>{{sprinter[5]}}</td>
                 <td>{{sprinter[6]}}</td>
-                <td>{{sprinter[9]}}</td>
-                <td>{{sprinter[10]}}</td>
-                <td>{{sprinter[11]}}</td>
-                <td>{{sprinter[12]}}</td>
+                <td>{% if sprinter[9]  is not none %}{{sprinter[9]}} {% else %}0{% endif%}</td>
+                <td>{% if sprinter[10] is not none %}{{sprinter[10]}}{% else %}0{% endif%}</td>
+                <td>{% if sprinter[11] is not none %}{{sprinter[11]}}{% else %}0{% endif%}</td>
+                <td>{% if sprinter[12] is not none %}{{sprinter[12]}}{% else %}0{% endif%}</td>
                 <td> {% if sprinter[4] != None %} <a href='{{sprinter[4]}}' target='sprinter'><img src='static/open.png'></a>{% endif %}</td>
-                <td><a href='/edit_sprinter?id_sprinter={{sprinter[0]}}'><img src='static/edit.png'></td>
-                <td><a href='/delete_sprinter?id_sprinter={{sprinter[0]}}'><img src='static/erase.png'></td>
+                {% if sprinter[3] == author or username == 'jjayala' %} 
+                    <td><a href='/edit_sprinter?id_sprinter={{sprinter[0]}}'><img src='static/edit.png'></td>
+                    <td><a href='/delete_sprinter?id_sprinter={{sprinter[0]}}'><img src='static/erase.png'></td>
+                {% else %}
+                    <td>&nbsp</td>
+                    <td>&nbsp</td>
+                {% endif %}
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
-
-</body>
+{% endblock %}
 
 

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for, jsonify
 import json
 from datetime import date
 import sprint, model
@@ -27,7 +27,8 @@ def home():
             session['username'] = username
             session['author'] = liuser
             session['grupo'] = grupo
-            return redirect(url_for('track'))
+
+            return redirect(url_for('myposts'))
         else:
             return render_template('index.html', mensaje=mensaje )
 
@@ -37,18 +38,16 @@ def signup():
     if request.method == 'GET':
         return render_template('signup.html')
 
-    print(request.method,request.form['accion'])
-
     if request.method == 'POST' and request.form['accion'] == 'signup':
-        print(request.method,request.form['accion'])
         username = request.form['username']
         password = request.form['password']
-        profile = request.form['profile']
         liuser = request.form['liuser']
+        profile = request.form['profile']
+        slack_username = request.form['slack_username']
         sprint_number = request.form['sprint_number']
         group = request.form['group']
         datos = sprint.Sprint()
-        codigo, mensaje = datos.signup(username, password, profile, liuser, sprint_number, group)
+        codigo, mensaje = datos.signup(username, password, liuser, profile, slack_username, sprint_number, group)
 
         if codigo == 0:
             return render_template('signup.html', mensaje=mensaje )
@@ -58,6 +57,10 @@ def signup():
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
+    username = validate_session()
+    if username == 0:
+        return redirect(url_for('home'))
+
     datos = sprint.Sprint()
     if request.method == 'GET':
         sprinters, pivot = datos.pivot_table()
@@ -70,12 +73,17 @@ def dashboard():
         print(day,owner)
         sprinters, pivot = datos.pivot_table(day, owner)
 
-    return render_template('dashboard.html', sprinters=sprinters, pivot=pivot, day_sel=day, owner_sel=owner )
+    sprinters_combo, cur_day, sprinter_sel, author = variables_new_post()
+    return render_template('dashboard.html', sprinters=sprinters, pivot=pivot, day_sel=day, owner_sel=owner, username=username, sprinters_combo=sprinters_combo, cur_day=cur_day, sprinter_sel=sprinter_sel, author=author )
 
 
 
 @app.route('/templates', methods=['GET'])
 def templates():
+    username = validate_session()
+    if username == 0:
+        return redirect(url_for('home'))
+
     if request.method == 'GET':
 
         templates = [
@@ -96,28 +104,38 @@ def templates():
                     'https://docs.google.com/document/d/11EKLlSbYks28hMJdO-KkgDgIwwPny_NaSl7ihB6X9Ys/edit?usp=sharing',
                     ]
 
-        return render_template('templates_sprint.html', templates=enumerate(templates))
+        sprinters_combo, cur_day, sprinter_sel, author = variables_new_post()
+        return render_template('templates_sprint.html', templates=enumerate(templates), username=username, sprinters_combo=sprinters_combo, cur_day=cur_day, sprinter_sel=sprinter_sel, author=author)
 
 
 @app.route('/new_post', methods=['GET','POST'])
 def new_post():
+    print(request.method)
     if request.method == 'GET':
         return render_template('new_post.html' )
 
     if request.method == 'POST':
-        day = request.form['day_number']
-        link = request.form['new_link']
-        owner = request.form['fauthor']
-        datos = sprint.Sprint()
-        datos.new_post(day, link, owner)
-        return redirect(request.referrer)
-        #return render_template('new_post.html' )
+
+        data = request.json
+
+        if data:
+            #print(data)
+            day = data['new_day']
+            owner = data['new_sprinter']
+            link = data['new_link']
+            #print(f"Datos: {day}, {owner}, {link}")
+            datos = sprint.Sprint()
+            datos.new_post(day, link, owner)
+        return jsonify(response='ok'), 201
 
 
 @app.route('/track', methods=['GET','POST'])
 def track():
+    username = validate_session()
+    if username == 0:
+        return redirect(url_for('home'))
+
     datos = sprint.Sprint()
-    username = session['username']
     #author = datos.get_liuser(username)
     author = session['author']
     grupo = session['grupo']
@@ -127,11 +145,11 @@ def track():
 
     if request.method == 'POST':
 
-        if 'filter_day' in request.form:
-            day = request.form['filter_day']
+        if 'day_sel' in request.form:
+            day = request.form['day_sel']
 
-        if 'owner_sel' in request.form:
-            owner_sel = request.form['owner_sel']
+        if 'sprinter_sel' in request.form:
+            sprinter_sel = request.form['sprinter_sel']
 
         data = request.json
 
@@ -144,34 +162,78 @@ def track():
     links = datos.get_links(day, owner_sel, author, grupo)
     sprinters = datos.get_sprinters()[0]
 
-    return render_template('track.html', day_sel=day, links=links, sprinters=sprinters, author=author, owner_sel=owner_sel)
+    return render_template('track.html', day_sel=day, links=links, sprinters=sprinters, author=author, owner_sel=owner_sel, username=username)
+
+
+@app.route('/save_check', methods=['POST'])
+def save_check():
+    if request.method == 'POST':
+
+        author = session['author']
+        data = request.json
+
+        if data:
+            day = data[0]['day']
+            id_post = data[1]['id_post']
+            action = data[2]['action']
+            datos = sprint.Sprint()
+            datos.insert_comments2(day, id_post, author, '', action)
+        return jsonify(response='ok'), 201
 
 
 @app.route('/myposts', methods=['GET','POST'])
 def myposts():
+    username = validate_session()
+    if username == 0:
+        return redirect(url_for('home'))
+
     datos = sprint.Sprint()
-    username = session['username']
-    author = session['author']
-    grupo = session['grupo']
+    sprinters_combo, cur_day, sprinter_sel, author = variables_new_post()
 
-    if 'owner_sel' in session:
-        owner_sel = session['owner_sel']
+    if 'group_sel' in session:
+        group_sel = session['group_sel']
     else:
-        owner_sel =  author
+        group_sel = session['grupo']
 
-    day = get_sprint_day()
+    if 'day_sel' in session:
+        day_sel = session['day_sel']
+    else:
+        day_sel = cur_day
+
+    if 'sprinter_sel' in session:
+        sprinter_sel = session['sprinter_sel']
+    else:
+        sprinter_sel =  'All'
 
     if request.method == 'GET':
         pass
 
     if request.method == 'POST':
-        owner_sel = request.form['owner_sel']
-        session['owner_sel'] = owner_sel
-        print(owner_sel)
+        group_sel = request.form['group_sel']
+        day_sel = request.form['day_sel']
+        sprinter_sel = request.form['sprinter_sel']
+        session['group_sel'] = group_sel
+        session['day_sel'] = day_sel
+        session['sprinter_sel'] = sprinter_sel
+        print(group_sel, day_sel, sprinter_sel)
 
-    links = datos.get_myposts(owner_sel)
+    links = datos.get_myposts(day_sel, sprinter_sel, author, group_sel)
     sprinters = datos.get_sprinters()[0]
-    return render_template('myposts.html', day_sel=day, links=links, sprinters=sprinters, author=author, owner_sel=owner_sel, username=session['username'])
+    return render_template('myposts.html', day_sel=day_sel, links=links, sprinters=sprinters, author=author, group_sel=group_sel, sprinter_sel=sprinter_sel, username=username, sprinters_combo=sprinters_combo, cur_day=cur_day)
+
+
+@app.route('/get_posts_curl', methods=['GET'])
+def get_posts_curl():
+
+    if request.method == 'GET':
+        datos = sprint.Sprint()
+        cur_day = get_sprint_day()
+        curl_posts = datos.get_posts_curl(cur_day, '%')
+        print(curl_posts)
+        return curl_posts, 200
+
+    if request.method == 'POST':
+        return jsonify(response='ok'), 201
 
 @app.route('/edit_post', methods=['GET','POST'])
 def edit_post():
@@ -186,9 +248,7 @@ def edit_post():
 
     if request.method == 'POST':
         #and request.form['accion'] == 'edit':
-        print(request.form['accion'],request.form['id_post'],request.form['link'])
-        print(request.form['num_views'],request.form['num_likes'],request.form['num_comments'])
-        print(request.form['owner_sel'])
+        print(request.form['accion'])
         id_post = request.form['id_post']
         link = request.form['link']
         num_views = request.form['num_views']
@@ -196,7 +256,6 @@ def edit_post():
         num_comments = request.form['num_comments']
         owner = request.form['owner_sel']
         datos = sprint.Sprint()
-        print(request.form['link'])
         datos.edit_post(id_post, link, num_views, num_likes, num_comments, owner)
         return redirect(url_for('myposts'))
 
@@ -212,10 +271,14 @@ def delete_post():
 
 @app.route('/sprinters', methods=['GET','POST'])
 def sprinters():
+    username = validate_session()
+    if username == 0:
+        return redirect(url_for('home'))
 
     datos = sprint.Sprint()
     sprinters = datos.get_sprinters()[1]
-    return render_template('sprinters.html', sprinters=sprinters)
+    sprinters_combo, cur_day, sprinter_sel, author = variables_new_post()
+    return render_template('sprinters.html', sprinters=sprinters, username=username, sprinters_combo=sprinters_combo, cur_day=cur_day, sprinter_sel=sprinter_sel, author=author)
 
 @app.route('/edit_sprinter', methods=['GET','POST'])
 def edit_sprinter():
@@ -232,10 +295,12 @@ def edit_sprinter():
         username = request.form['username']
         password = request.form['password']
         sprinter = request.form['sprinter']
+        #slack_username = request.form['slack_username']
         profile = request.form['profile']
         sprint_number = request.form['sprint_number']
         group = request.form['group']
         datos = sprint.Sprint()
+        print(id_sprinter, username, password, sprinter, profile, sprint_number, group)
         datos.edit_sprinter(id_sprinter, username, password, sprinter, profile, sprint_number, group)
         return redirect(url_for('sprinters'))
 
@@ -250,6 +315,10 @@ def delete_sprinter():
 
 @app.route("/stats", methods=['GET', 'POST'])
 def chart():
+
+    username = validate_session()
+    if username == 0:
+        return redirect(url_for('home'))
 
     if request.method == 'POST':
         day = request.form['filter_day']
@@ -266,7 +335,55 @@ def chart():
     print('Datos:', dataset)
     print('Likes:', num_likes)
     print('Comments:', num_comments)
-    return render_template('chart.html', dataset=dataset, day_sel=day, owner_sel=owner, sprinters=sprinters, num_likes=num_likes, num_comments=num_comments)
+    sprinters_combo, cur_day, sprinter_sel, author = variables_new_post()
+    return render_template('chart.html', dataset=dataset, day_sel=day, owner_sel=owner, sprinters=sprinters, num_likes=num_likes, num_comments=num_comments, username=username, sprinters_combo=sprinters_combo, cur_day=cur_day, sprinter_sel=sprinter_sel, author=author)
+
+
+@app.route("/validate", methods=['GET', 'POST'])
+def validate_session():
+    if 'username' in session:
+        print(f"Username: {session['username']}")
+        return session['username']
+    else:
+        return 0
+
+def get_sprint_day():
+    d1 = date(2022, 3, 14)
+    d2 = date.today()
+    return (d2 - d1).days
+    
+
+def variables_new_post():
+
+    datos = sprint.Sprint()
+
+    if 'sprinters_combo' not in session:
+        session['sprinters_combo'] = datos.get_sprinters()[0]
+
+    if 'cur_day' not in session:
+        session['cur_day'] = get_sprint_day()
+    
+    if 'author' in session:
+        author = session['author']
+
+    if 'sprinter_sel' in session:
+        sprinter_sel = session['sprinter_sel']
+    else:
+        sprinter_sel =  author
+
+    return session['sprinters_combo'], session['cur_day'], sprinter_sel, author
+
+
+@app.route('/logout', methods=['GET'])
+def logout():
+    session.clear()
+    return redirect(url_for('home'))
+
+
+########################################################################################################################################
+#################################################SLACK FUNCTIONS########################################################################
+########################################################################################################################################
+
 
 @app.route("/slack", methods=['GET', 'POST'])
 def slack():
@@ -283,13 +400,22 @@ def slack():
 
         challenge = "ok"
         if data is not None:
+
+            #with open('data.txt', 'w') as f:
+            #    f.write(data)
+
             if 'challenge' in data:
                 challenge = data['challenge'] 
 
             if 'event' in data:
-                print(data['event']['user'])
-                reaction = data['event']['reaction']
-                response = client.chat_postMessage(channel='U01NNASMGSV', text=reaction)
+                if 'reaction' in data['event']:
+                    print(data['event']['user'])
+                    reaction = data['event']['reaction']
+                    response = client.chat_postMessage(channel='U01NNASMGSV', text=reaction)
+                elif data['event']['type'] == 'link_shared':
+                    link = data['event']['links'][0]['url']
+                    print(data['event']['user'])
+                    print(link)
 
         if 'payload' in data1:
             data2 = json.loads(data1['payload'])
@@ -306,7 +432,7 @@ def slack():
             #print(data2)
 
             #Block for new post
-            if 'view' in data2:  
+            if data2['type'] == 'view_submission' and 'view' in data2:  
                 if 'state' in data2['view']:  
                     if 'values' in data2['view']['state']:  
                         if 'combo_day' in data2['view']['state']['values']:  
@@ -318,7 +444,8 @@ def slack():
                             if link == '':
                                 view = modal.get_view_new_post_status('link')
 
-                            owner='jjj'
+                            owner = data2['user']['username']
+                            print(data2['user'])
                             datos = sprint.Sprint()
                             id_np = datos.new_post(day, link, owner)
 
@@ -365,7 +492,7 @@ def slack_checkbox(data):
     datos = sprint.Sprint()
 
     author = data['user']['username']
-    author = 'José de Jesús Juárez Ayala'
+    #author = 'José de Jesús Juárez Ayala'
     id_post = data['actions'][0]['action_id'] 
     day = data['actions'][0]['value']
     action = True
@@ -389,7 +516,7 @@ def slack_track_posts():
 
         owner_sel = '%'
         author = 'José de Jesús Juárez Ayala'
-        grupo = 'C'
+        grupo = '1'
         links = datos.get_links(day, owner_sel, author, grupo)
         
         #print('--------------------------------------------')
@@ -418,9 +545,10 @@ def slack_new_post():
         link = data['text']
 
         link = data['text']
+        day = get_sprint_day()
 
         if link == '':
-            view = modal.get_view_new_post()
+            view = modal.get_view_new_post(day)
 
         else:
             link = data['text']
@@ -441,18 +569,9 @@ def slack_new_post():
         response = client.views_open(**payload)
         return ('', 200)
 
-def get_sprint_day():
-    d1 = date(2022, 1, 9)
-    d2 = date.today()
-    return (d2 - d1).days
-    
 def get_slack_token():
-    return 'xoxb-1781579884544-2944839523991-W4hg53EfvaVYQKEJa0jLXYTS'
+    return 'xoxb-1781579884544-2944839523991-kC5uCZaYnvDUnBQnyba46pDg'
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8002, debug=True)
-
-
-
-
 

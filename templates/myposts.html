@@ -1,57 +1,44 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
+{% extends 'control.html' %}
 
-  <title>Dashboard Sprint</title>
-  <meta name="description" content="HTML5 Template">
-  <meta name="author" content="JJJA">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-  <link rel="stylesheet" href="static/style.css?v=1.0">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src='static/track.js'></script>
-</head>
+{% block content %}
 
-<body>
-    <h1>LinkedIn Sprint Thomas Kuegler January 2022</h1>
-    <button class='btn btn-primary' onclick="location.href='/dashboard'">Dashboard</button>
-    <button class='btn btn-primary' onclick="location.href='/stats'">Stats</button>
-    <button class='btn btn-primary' onclick="location.href='/track'">Track</button>
-    <button class='btn btn-primary' onclick="location.href='/sprinters'">Sprinters</button>
-    <button class='btn btn-primary' onclick="location.href='/templates'">Templates</button>
-    <br><p>
-
-    <form name="fowner" method="post" class="form-inline">
-        <div class="input-group input-group-sm col-4">
+    <form name="fposts" method="post" class="form-inline">
+        <div class="input-group input-group-sm col-2">
             <div class="input-group-prepend">
-                <span class="input-group-text" id="inputGroup2">Sprinter:</span>
+                <span class="input-group-text" id="inputGroup2">Group</span>
             </div>
-            <select name='owner_sel' class="form-control" onchange="document.fnewpost.fauthor.value=this.options[this.selectedIndex].value;submit()" required>
-                {% if username == 'jjayala' %}
-                    {% for sp in sprinters %}
-                    <option {% if owner_sel == sp %} selected {% endif %} value="{{sp}}">{{sp}}</option>
-                    {% endfor%}
-                {% else %}
-                    <option value="{{author}}">{{author}}</option>
-                {% endif %}
+            <select name="group_sel" id="group_sel" class="form-control">
+                <option {% if group_sel == '%' %} selected {% endif %} value="%">All</option>
+                {% for d in range(1, 5) %}
+                    <option {% if group_sel|int == d %} selected {% endif %} value="{{d}}">{{d}}</option>
+                {% endfor%}
             </select>
         </div>
-    </form>
-
-    <form name="fnewpost" method="post" class="form-inline" action="/new_post">
-        <input type="hidden" name="fauthor" value="{{owner_sel}}">
         <div class="input-group input-group-sm col-2">
             <div class="input-group-prepend">
                 <span class="input-group-text" id="inputGroup2">Day(1-30)</span>
             </div>
-            <input type="number" id="day_number" name="day_number" min="1" max="30" value={{day_sel}} class="form-control" aria-label="Small" aria-describedby="inputGroup2">
+            <select name="day_sel" id="day_sel" class="form-control">
+                <option {% if day_sel == '%' %} selected {% endif %} value="%">All</option>
+                {% for d in range(1, 31) %}
+                    <option {% if day_sel|int == d %} selected {% endif %} value="{{d}}">{{d}}</option>
+                {% endfor%}
+            </select>
         </div>
-        <div class="input-group input-group-sm col-6">
+        <div class="input-group input-group-sm col-4">
             <div class="input-group-prepend">
-                <span class="input-group-text" id="inputGroup2">URL:</span>
+                <span class="input-group-text" id="inputGroup2">Sprinter:</span>
             </div>
-            <input type="url" id="new_link" name="new_link" placeholder="LinkedIn URL" class="form-control">
-            <input type="submit" value='Send' class="btn btn-success">
+            <select name='sprinter_sel' class="form-control" required>
+                <option {% if sprinter_sel == 'All' %} selected {% endif %} value='%'>All</option>
+                {% for sp in sprinters %}
+                    <option {% if sprinter_sel == sp %} selected {% endif %} value="{{sp}}">{{sp}}</option>
+                {% endfor%}
+            </select>
+        </div>
+        <div class="input-group input-group-sm col-2">
+            <input type="submit" value='Apply filter' class="btn btn-success">
+            <span class="badge badge-success" id="progress"></span>
         </div>
     </form>
     <br><p>
@@ -59,39 +46,47 @@
     <table class='table table-bordered table-striped table-hover table-sm table-responsive table-dark'>
         <thead>
             <tr class='bg-success'>
+                <th>No.</th>
                 <th>Day</th>
                 <th>Sprinter</th>
                 <th>Date/Time</th>
                 <th>Views</th>
                 <th>Reactions</th>
-                <th>Total Comments</th>
-                <th>Sprint Comments</th>
-                <th>Extra</th>
+                <th>Comments</th>
+                <!-- <th>Sprint Comments</th> -->
+                <!-- <th>Extra</th> -->
                 <th>Open</th>
                 <th>Edit</th>
                 <th>Delete</th>
+                <th>Read/Comment</th>
             </tr>
         </thead>
         <tbody>
         {% for link in links %}
             <tr>
+                <td>{{loop.index0+1}}</td>
                 <td>{{link[1]}}</td>
                 <td>{{link[2]}}</td>
-                <td>{{link[4]}}</td>
-                <td>{{link[5]}}</td>
                 <td>{{link[6]}}</td>
-                <td>{{link[7]}}</td>
-                <td>{{link[8]}}</td>
-                <td></td>
+                <td>{% if link[7] is not none %}{{link[7]}} {% else %}0{% endif%}</td>
+                <td>{% if link[8] is not none %}{{link[8]}} {% else %}0{% endif%}</td>
+                <td>{% if link[9] is not none %}{{link[9]}} {% else %}0{% endif%}</td>
+                <!-- <td>{{link[8]}}</td> -->
+                <!-- <td></td> -->
                 <td><a href='{{link[3]}}' target='post'><img src='static/open.png'></a></td>
-                <td><a href='/edit_post?id_post={{link[0]}}'><img src='static/edit.png'></td>
-                <td><a href='/delete_post?id_post={{link[0]}}'><img src='static/erase.png'></td>
+                {% if link[2] == author or username == 'jjayala' %} 
+                    <td><a href='/edit_post?id_post={{link[0]}}'><img src='static/edit.png'></td>
+                    <td><a href='/delete_post?id_post={{link[0]}}'><img src='static/erase.png'></td>
+                {% else %}
+                    <td>&nbsp</td>
+                    <td>&nbsp</td>
+                {% endif %}
+
+                <td><input class='check' type='checkbox' name='id_post' id='{{link[0]}}' value='{{link[0]}}' {% if link[5]|int > 0 %} checked {% endif %}></td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
-
-</body>
-
+{% endblock %}
 

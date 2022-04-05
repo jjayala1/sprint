@@ -1,0 +1,59 @@
+{% extends 'control.html' %}
+
+{% block content %}
+
+<div class="modal fade" id="empModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New post</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="col-auto">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">Sprinter:</div>
+                        </div>
+                        <select name="new_sprinter" id="new_sprinter" class="form-control" required>
+                            {% if username == 'jjayala' %}
+                            {% for sp in sprinters %}
+                            <option {% if sprinter_sel == sp %} selected {% endif %} value="{{sp}}">{{sp}}</option>
+                            {% endfor%}
+                            {% else %}
+                            <option value="{{author}}">{{author}}</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-auto">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup2">Day(1-30)</span>
+                        </div>
+                        <input type="number" id="new_day" name="new_day" min="1" max="30" value={{cur_day}} class="form-control" aria-label="Small" aria-describedby="inputGroup2">
+                    </div>
+                </div>
+
+                <div class="col-auto">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup2">URL:</span>
+                        </div>
+                        <input type="url" id="new_link" name="new_link" placeholder="LinkedIn URL" class="form-control">
+                    </div>
+                </div>
+                <br><p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id='save_post'>Save</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

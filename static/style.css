@@ -46,3 +46,10 @@ td img{
     margin-left: auto;
     margin-right: auto;
 }
+
+.alert{
+    position: fixed;
+    bottom: 5px;
+    right:5%;
+    width: 15%;
+}
