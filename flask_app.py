@@ -190,20 +190,21 @@ def myposts():
 
     datos = sprint.Sprint()
 
-    if 'group_sel' in session:
-        group_sel = session['group_sel']
-    elif 'grupo' in session:
-        group_sel = session['grupo']
-    else:
-        group_sel = '%'
-
     if request.method == 'GET':
+
+        if 'group_sel' in session:
+            group_sel = session['group_sel']
+        elif 'grupo' in session:
+            group_sel = session['grupo']
+        else:
+            group_sel = '%'
+
         sprinters_combo, cur_day, sprinter_sel, author = variables_new_post(group_sel)
 
-    if 'day_sel' in session:
-        day_sel = session['day_sel']
-    else:
-        day_sel = cur_day
+        if 'day_sel' in session:
+            day_sel = session['day_sel']
+        else:
+            day_sel = cur_day
 
     if request.method == 'POST':
         group_sel = request.form['group_sel']
@@ -318,20 +319,21 @@ def chart():
 
     datos = sprint.Sprint()
 
-    if 'group_sel' in session:
-        group_sel = session['group_sel']
-    elif 'grupo' in session:
-        group_sel = session['grupo']
-    else:
-        group_sel = '%'
-
     if request.method == 'GET':
+
+        if 'group_sel' in session:
+            group_sel = session['group_sel']
+        elif 'grupo' in session:
+            group_sel = session['grupo']
+        else:
+            group_sel = '%'
+
         sprinters_combo, cur_day, sprinter_sel, author = variables_new_post(group_sel)
 
-    if 'day_sel' in session:
-        day_sel = session['day_sel']
-    else:
-        day_sel = cur_day
+        if 'day_sel' in session:
+            day_sel = session['day_sel']
+        else:
+            day_sel = cur_day
 
     if request.method == 'POST':
         group_sel = request.form['group_sel']
