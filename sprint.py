@@ -4,33 +4,36 @@ from bs4 import BeautifulSoup
 import sqlite3
 from sqlite3 import Error
 from datetime import date, datetime
+import time
 from html import unescape
 import subprocess
 
 
 class Sprint():
 
-    def __init__(self, day=1, file='', link=''):
+    def __init__(self, day=1, file_post='post.html', link=''):
 
         self.day = day
-        self.file = file
         self.link = link
-        self.ruta = './'
-        self.ruta = path.dirname(__file__) if "__file__" in locals() else os.getcwd()
-        #self.conn = self.create_database(f'{self.ruta}/sprint.db');
-        #self.create_tables()
+        self.file_post = file_post
+        self.ruta = os.path.dirname(__file__) if "__file__" in locals() else os.getcwd()
+        if not self.ruta.endswith('sprint'):
+            self.ruta += '/sprint' 
+        self.conn = self.create_database(f'{self.ruta}/sprint.db');
+        self.create_tables()
         self.data = ''
-        self.file_name = 'file.txt'
         self.num_likes = 0
         self.num_comments = 0
 
 
     def main(self):
 
-        if self.file != '':
+        if self.link != '':
+            self.get_page_curl()
+            pass
+        if self.file_post != '':
+            print(f"FILE: {self.file_post}")
             self.read_file()
-        elif self.link != '':
-            self.get_page()
 
         if self.data != '':
             self.soup = BeautifulSoup(self.data, "html.parser")
@@ -41,27 +44,45 @@ class Sprint():
         l = self.link.strip()
         proxyDict = { "http": "socks5h://localhost:3128", "https": "socks5h://localhost:3128", }
         page = requests.get(l)
-        print(l, self.file_name)
+        print(l, self.file_post)
 
-        with open(f'{self.ruta}/posts/{self.file_name}', 'bw') as file:
+        with open(f'{self.ruta}/{self.file_post}', 'bw') as file:
             #file.write(l)
             file.write(page.content)
         self.data = page.content
 
+    def get_posts_curl(self, day=1, sprinter=''):
+        sql_curl = f"select link, 'posts/day' || substr('0' || day,-2) || '_' || username || '.html' from posts inner join sprinters on sprinter=owner where day='{day}' and sprinter like '{sprinter}'"
+        curl = self.conn.cursor()
+        curl.execute(sql_curl)
+        return curl.fetchall()
+
+    def get_page_curl(self):
+        command = f'curl {self.link} --output {self.file_post}'
+        subprocess.run([command], shell=True)
+
     def read_file(self):
-        f = open(f'{self.ruta}/posts/{self.file}');
-        self.data = f.read()
-        self.link = self.data.splitlines()[0]
+
+        size = os.path.getsize(f"{self.ruta}/{self.file_post}")
+        
+        if size > 5000:
+            f = open(f'{self.ruta}/{self.file_post}');
+            self.data = f.read()
+            #self.link = self.data.splitlines()[0]
+        else:
+            self.data = ''
 
     def get_likes(self):
         try:
             self.link = self.soup.find("meta", property="og:url")["content"]
             self.owner = self.soup.find('a', class_ = 'share-update-card__actor-text-link').text.strip()
+            print("OWNER:" + self.owner)
             self.num_likes = self.soup.find('span', class_ = 'social-counts-reactions__social-counts-numRections').text.strip()
             #num_comments = self.soup.find_all('a', { 'class':'social-action-counts__social-counts-item'})
             self.num_comments = self.soup.select('a[class="social-action-counts__social-counts-item"]')[0].text.strip().split()[0]
             print(self.link, self.num_likes, self.num_comments)
-            self.id_post = self.insert_tarea()
+            #self.id_post = self.insert_tarea()
+            self.edit_post(0, self.link, 0, self.num_likes, self.num_comments, '')
         except:
             print('Error')
 
@@ -260,9 +281,9 @@ class Sprint():
         self.conn.commit()
         return cur.lastrowid
 
-    def get_sprinters(self):
+    def get_sprinters(self, grupo):
 
-        sql_sprinters = f"SELECT S.*,PC.num_posts,PC.num_comments_sprinters,PC.num_comments,PC.num_likes from sprinters S LEFT JOIN (SELECT owner,count(*) num_posts, sum(C.num_comments_sprinters) num_comments_sprinters, sum(P.num_comments) as num_comments, sum(num_likes) as num_likes FROM posts P LEFT JOIN (SELECT id_post,count(*) num_comments_sprinters FROM comments GROUP BY id_post) C on P.id=C.id_post GROUP BY owner) PC on S.sprinter=PC.owner order by S.sprinter"
+        sql_sprinters = f"SELECT S.*,PC.num_posts,PC.num_comments_sprinters,PC.num_comments,PC.num_likes from sprinters S LEFT JOIN (SELECT owner,count(*) num_posts, sum(C.num_comments_sprinters) num_comments_sprinters, sum(P.num_comments) as num_comments, sum(num_likes) as num_likes FROM posts P LEFT JOIN (SELECT id_post,count(*) num_comments_sprinters FROM comments GROUP BY id_post) C on P.id=C.id_post GROUP BY owner) PC on S.sprinter=PC.owner  where S.grupo like '{grupo}' order by S.sprinter"
         print("Sprinters: " + sql_sprinters)
         spr = self.conn.cursor()
         spr.execute(sql_sprinters)
@@ -270,7 +291,7 @@ class Sprint():
         sprinters_name = []
 
         for s in sprinters:
-            sprinters_name.append(s[3])
+            sprinters_name.append([s[3], s[3] + ' G' +  s[6]])
         return sprinters_name, sprinters
 
     def get_links(self, day, owner, author, grupo):
@@ -284,23 +305,13 @@ class Sprint():
 
     def get_myposts(self, day, owner, author, grupo ):
 
-        sql_links = f"SELECT P.id, P.day, owner, link, sum(tot_comm), sum(auth_comm), start_date, num_views, num_likes, num_comments, count(id_post) from posts P inner join sprinters S on P.owner=S.sprinter left join (select id_post,author, sum(case when author='{author}' then 1 end) as auth_comm, count(*) as tot_comm from comments where message='' group by id_post) C on P.id=C.id_post WHERE S.grupo='{grupo}' and P.day like '{day}' and P.owner like '{owner}' GROUP BY P.id ORDER BY owner,day"
+        sql_links = f"SELECT P.id, P.day, owner, link, sum(tot_comm), sum(auth_comm), start_date, num_views, num_likes, num_comments, count(id_post) from posts P inner join sprinters S on P.owner=S.sprinter left join (select id_post,author, sum(case when author='{author}' then 1 end) as auth_comm, count(*) as tot_comm from comments where message='' group by id_post) C on P.id=C.id_post WHERE S.grupo like '{grupo}' and P.day like '{day}' and P.owner like '{owner}' GROUP BY P.id ORDER BY owner,day"
         #sql_links = f"SELECT P.id, day, owner, link, start_date, num_views, num_likes, num_comments, count(id_post) from posts P inner join sprinters S on P.owner=S.sprinter left join (select * from comments where message='') C on P.id=C.id_post WHERE P.owner like '{author}' group by P.id,owner,link ORDER BY day"
         print(sql_links)
         lnk = self.conn.cursor()
         lnk.execute(sql_links)
         links = lnk.fetchall()
         return links
-
-    def get_posts_curl(self, day=1, sprinter=''):
-        sql_curl = f"select 'curl ' || link || ' > posts/day' || substr('0' || day,-2) || '_' || username || '.html' from posts inner join sprinters on sprinter=owner where day='{day}' and sprinter like '{sprinter}'"
-        curl = self.conn.cursor()
-        curl.execute(sql_curl)
-        return curl.fetchall()
-
-    def execute_curl(self, link):
-        print(link)
-        subprocess.run([link], shell=True)
 
 
 #######################################################################################################################
@@ -373,34 +384,45 @@ class Sprint():
         liusr = liu.fetchall()
         return liusr[0][0]
 
-    def data_likes(self, day='%', owner='%'):
+    def data_likes(self, group_sel='%', day_sel='%', sprinter_sel='%'):
 
-        sql_data = f"SELECT owner, sum(num_likes), sum(num_comments) from posts where day like '{day}' and owner like '{owner}' group by owner order by owner"
+        sql_data = f"SELECT owner, sum(num_likes), sum(num_comments) from posts inner join sprinters on owner=sprinter where grupo like '{group_sel}' and day like '{day_sel}' and owner like '{sprinter_sel}' group by owner order by owner"
 
-        if owner != '%':
-            sql_data = f"SELECT day, num_likes, num_comments from posts where day like '{day}' and owner like '{owner}' order by day"
+        if sprinter_sel != '%':
+            sql_data = f"SELECT day, num_likes, num_comments from posts inner join sprinters on owner=sprinter where grupo like '{group_sel}' and day like '{day_sel}' and owner like '{sprinter_sel}' order by day"
 
-        if day != '%':
-            sql_data = f"SELECT owner, num_likes, num_comments from posts where day like '{day}' and owner like '{owner}' order by day"
+        if day_sel != '%':
+            sql_data = f"SELECT owner, num_likes, num_comments from posts inner join sprinters on owner=sprinter where grupo like '{group_sel}' and day like '{day_sel}' and owner like '{sprinter_sel}' order by day"
 
+        print(sql_data)
         data = self.conn.cursor()
         data.execute(sql_data)
-        print(sql_data)
 
         dataset = []
         for d in data:
             s = [d[0], d[1], d[2]]
             dataset.append(s)
 
-        sql_reactions = f"SELECT sum(num_likes), sum(num_comments) from posts where day like '{day}' and owner like '{owner}'"
+        sql_reactions = f"SELECT count(*),sum(num_likes), sum(num_comments) from posts inner join sprinters on owner=sprinter where grupo like '{group_sel}' and day like '{day_sel}' and owner like '{sprinter_sel}'"
+        print(sql_reactions)
         data1 = self.conn.cursor()
         data1.execute(sql_reactions)
 
         for d in data1:
-            num_likes = d[0]
-            num_comments = d[1]
+            num_posts = f'{d[0]:,}'
 
-        return dataset, num_likes, num_comments
+            if d[1] is None:
+                num_likes = 0
+            else:
+                num_likes = f'{d[1]:,}'
+
+            if d[1] is None:
+                num_comments = 0
+            else:
+                num_comments = f'{d[2]:,}'
+
+
+        return dataset, num_posts, num_likes, num_comments
 
 
 if __name__ == '__main__':
@@ -412,8 +434,8 @@ if __name__ == '__main__':
     #    links = open(archivo_links)
     #    for l in links.readlines():
     #        sprint = Sprint(d,'',l)
-    #        sprint.file_name = archivo_links.split('_')[1][:-4] + '_' + str(d).zfill(2) + '.html'
-    #        #print(sprint.file_name)
+    #        sprint.file_post = archivo_links.split('_')[1][:-4] + '_' + str(d).zfill(2) + '.html'
+    #        #print(sprint.file_post)
     #        #print(l)
     #        sprint.main()
     #        d += 1
@@ -422,27 +444,37 @@ if __name__ == '__main__':
     #    print(f'Archivo {archivo_links} no existe')
 
     def get_posts_sh():
-        cur_day = (date.today() - date(2022, 3, 14)).days
-        sprint = Sprint()
- 
+        user = 'rosey-hwang'
+        user = ''
         for d in range(cur_day-6, cur_day+1):
             posts = sprint.get_posts_curl(d, '%')
+
             for p in posts:
-                command = p[0]
-                sprint.execute_curl(command)
-        exit()
+                link = p[0]
+                file_post = p[1]
 
-    user = 'stanfield'
-    user = 'l'
-    for file_post in os.scandir("./posts/"):
-        if file_post.name[-4:] == 'html' and user in file_post.name:
-            day = file_post.name[3:5]
-            print(day,file_post.name)
-            size = os.path.getsize(f"./posts/{file_post.name}")
+                if  not os.path.exists(f"./{file_post}") or time.time() - os.path.getmtime(f"./{file_post}") > 86400 or user in file_post:
+                    print(link, file_post)
+                    #sprint.get_page_curl(link, file_post)
+                    sprint.day = d
+                    sprint.link = link
+                    sprint.file_post = file_post
+                    sprint.main()
 
-            if size > 5000:
-                sprint = Sprint(day, f'{file_post.name}', '')
-                sprint.main()
+    def get_likes():
+        user = 'stanfield'
+        user = 'l'
+        for d in range(cur_day-6, cur_day+1):
+            for file_post in os.scandir("./posts/"):
+                if file_post.name[-4:] == 'html' and str(d).zfill(2) in file_post.name:
+                    day = file_post.name[3:5]
+                    size = os.path.getsize(f"./posts/{file_post.name}")
+        
+                    if size > 5000:
+                        print(day,file_post.name)
+                        sprint = Sprint(day, f'{file_post.name}', '')
+                        sprint.main()
+
 
     def rename_to_html():
         for file_post in os.scandir("./posts"):
@@ -466,4 +498,8 @@ if __name__ == '__main__':
                 #print(sprint.pivot_table())
                 os.rename(f'./posts/{origin}', f'./posts/{dest}')
 
+    cur_day = (date.today() - date(2022, 3, 14)).days + 1
+    sprint = Sprint()
+    get_posts_sh()
+    #get_likes()
 

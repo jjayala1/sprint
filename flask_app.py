@@ -183,43 +183,41 @@ def save_check():
 
 @app.route('/myposts', methods=['GET','POST'])
 def myposts():
+
     username = validate_session()
     if username == 0:
         return redirect(url_for('home'))
 
     datos = sprint.Sprint()
-    sprinters_combo, cur_day, sprinter_sel, author = variables_new_post()
 
     if 'group_sel' in session:
         group_sel = session['group_sel']
-    else:
+    elif 'grupo' in session:
         group_sel = session['grupo']
+    else:
+        group_sel = '%'
+
+    if request.method == 'GET':
+        sprinters_combo, cur_day, sprinter_sel, author = variables_new_post(group_sel)
 
     if 'day_sel' in session:
         day_sel = session['day_sel']
     else:
         day_sel = cur_day
 
-    if 'sprinter_sel' in session:
-        sprinter_sel = session['sprinter_sel']
-    else:
-        sprinter_sel =  'All'
-
-    if request.method == 'GET':
-        pass
-
     if request.method == 'POST':
         group_sel = request.form['group_sel']
         day_sel = request.form['day_sel']
         sprinter_sel = request.form['sprinter_sel']
+        sprinters_combo, cur_day, sprinter_sel1, author = variables_new_post(group_sel)
         session['group_sel'] = group_sel
         session['day_sel'] = day_sel
         session['sprinter_sel'] = sprinter_sel
-        print(group_sel, day_sel, sprinter_sel)
+        print("SESSION: " + session['group_sel'], session['day_sel'], session['sprinter_sel'])
 
+    print("FILTERS: " + group_sel, day_sel, sprinter_sel)
     links = datos.get_myposts(day_sel, sprinter_sel, author, group_sel)
-    sprinters = datos.get_sprinters()[0]
-    return render_template('myposts.html', day_sel=day_sel, links=links, sprinters=sprinters, author=author, group_sel=group_sel, sprinter_sel=sprinter_sel, username=username, sprinters_combo=sprinters_combo, cur_day=cur_day)
+    return render_template('myposts.html', group_sel=group_sel, day_sel=day_sel, sprinter_sel=sprinter_sel, links=links, author=author, username=username, sprinters_combo=sprinters_combo, cur_day=cur_day)
 
 
 @app.route('/get_posts_curl', methods=['GET'])
@@ -317,26 +315,51 @@ def delete_sprinter():
 def chart():
 
     username = validate_session()
-    if username == 0:
-        return redirect(url_for('home'))
-
-    if request.method == 'POST':
-        day = request.form['filter_day']
-        owner = request.form['filter_owner']
-        print(day,owner)
-
-    else:
-        day = '%'
-        owner = '%'
 
     datos = sprint.Sprint()
-    sprinters = datos.get_sprinters()[0]
-    dataset, num_likes, num_comments = datos.data_likes(day, owner)
-    print('Datos:', dataset)
+
+    if 'group_sel' in session:
+        group_sel = session['group_sel']
+    elif 'grupo' in session:
+        group_sel = session['grupo']
+    else:
+        group_sel = '%'
+
+    if request.method == 'GET':
+        sprinters_combo, cur_day, sprinter_sel, author = variables_new_post(group_sel)
+
+    if 'day_sel' in session:
+        day_sel = session['day_sel']
+    else:
+        day_sel = cur_day
+
+    if request.method == 'POST':
+        group_sel = request.form['group_sel']
+        day_sel = request.form['day_sel']
+        sprinter_sel = request.form['sprinter_sel']
+        sprinters_combo, cur_day, sprinter_sel1, author = variables_new_post(group_sel)
+        session['group_sel'] = group_sel
+        session['day_sel'] = day_sel
+        session['sprinter_sel'] = sprinter_sel
+        print("SESSION: " + session['group_sel'], session['day_sel'], session['sprinter_sel'])
+
+    print("FILTERS: " + group_sel, day_sel, sprinter_sel)
+    dataset, num_posts, num_likes, num_comments = datos.data_likes(group_sel, day_sel, sprinter_sel)
+
+    if day_sel == '%':
+        days = cur_day
+    else:
+        days = 1
+
+    completion = f"{int(num_posts.replace(',','')) / (int(days)*len(sprinters_combo)):0.1%}"
+
+    print('Sprinters:', len(sprinters_combo))
+    print('Days:', days)
+    print('Posts:', num_posts)
     print('Likes:', num_likes)
     print('Comments:', num_comments)
-    sprinters_combo, cur_day, sprinter_sel, author = variables_new_post()
-    return render_template('chart.html', dataset=dataset, day_sel=day, owner_sel=owner, sprinters=sprinters, num_likes=num_likes, num_comments=num_comments, username=username, sprinters_combo=sprinters_combo, cur_day=cur_day, sprinter_sel=sprinter_sel, author=author)
+
+    return render_template('chart.html', dataset=dataset, group_sel=group_sel, day_sel=day_sel, sprinter_sel=sprinter_sel, num_posts=num_posts, completion=completion, num_likes=num_likes, num_comments=num_comments, username=username, sprinters_combo=sprinters_combo, cur_day=cur_day, author=author)
 
 
 @app.route("/validate", methods=['GET', 'POST'])
@@ -345,32 +368,35 @@ def validate_session():
         print(f"Username: {session['username']}")
         return session['username']
     else:
-        return 0
+        return '0'
 
 def get_sprint_day():
     d1 = date(2022, 3, 14)
     d2 = date.today()
-    return (d2 - d1).days
+    return (d2 - d1).days + 1
     
 
-def variables_new_post():
+def variables_new_post(group_sel='%'):
 
     datos = sprint.Sprint()
 
-    if 'sprinters_combo' not in session:
-        session['sprinters_combo'] = datos.get_sprinters()[0]
+    #if 'sprinters_combo' not in session:
+    session['sprinters_combo'] = datos.get_sprinters(group_sel)[0]
 
     if 'cur_day' not in session:
         session['cur_day'] = get_sprint_day()
     
     if 'author' in session:
         author = session['author']
+    else: 
+        author = '%'
 
     if 'sprinter_sel' in session:
         sprinter_sel = session['sprinter_sel']
     else:
         sprinter_sel =  author
 
+    print(session['sprinters_combo'])
     return session['sprinters_combo'], session['cur_day'], sprinter_sel, author
 
 

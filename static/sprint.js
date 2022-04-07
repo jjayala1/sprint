@@ -29,7 +29,7 @@ $(document).ready(function(){
     function progress(){
         var checked = $("input:checkbox:checked").length
         var total = $("input:checkbox").length
-        $("#progress").html('Progress:<br><br>' + checked + '/' + total)
+        $("#progress").html(checked + '/' + total)
     }
 
     progress();
